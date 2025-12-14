@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ali Nasrollahpour | Developer & Designer</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Light Mode Defaults */
+            --bg-color: #f0e7db;
+            --text-color: #202023;
+            --secondary-text: #666;
+            --link-color: #3d7aed;
+            --accent-color: #ccffc4; /* Light green accent */
+            --border-color: #ccc;
+        }
+
+        /* Dark Mode Override (Activated by the 'dark-mode' class on the body) */
+        body.dark-mode {
+            --bg-color: #202023;
+            --text-color: #f0e7db;
+            --secondary-text: #a0a0a0;
+            --link-color: #ff6347; /* Tomato red/orange for contrast */
+            --accent-color: #88ccff; /* Blue accent */
+            --border-color: #3b3b3b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- Header/Navbar Styling --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        nav a:hover {
+            background-color: rgba(136, 204, 255, 0.2); /* Light blue hover background */
+        }
+        
+        .mode-toggle {
+            cursor: pointer;
+            font-size: 1.5em;
+            background: none;
+            border: none;
+            color: var(--text-color);
+        }
+
+        /* --- Main Profile Section --- */
+        .profile-section {
+            background-color: var(--border-color); /* Use border color for a subtle contrast box */
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-color);
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .intro h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        .intro p {
+            margin: 5px 0 0;
+            color: var(--secondary-text);
+        }
+
+        /* --- Content Sections --- */
+        section h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-top: 30px;
+            font-size: 1.6em;
+        }
+
+        /* Card Styling for Projects/Bio */
+        .card {
+            background-color: var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--link-color);
+        }
+        
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        /* --- Footer Styling --- */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 50px;
+            color: var(--secondary-text);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <div class="container">
+
+        <header>
+            <a href="#" class="logo">Ali Nasrollahpour</a>
+            <nav>
+                <a href="#about">About</a>
+                <a href="#projects">Projects</a>
+                <a href="https://github.com/AliNasrollahpour" target="_blank">GitHub</a>
+            </nav>
+            <button class="mode-toggle" id="mode-toggle" aria-label="Toggle Dark/Light Mode">💡</button>
+        </header>
+
+        <div class="profile-section">
+            <img src="profile.jpg" alt="Ali Nasrollahpour" class="profile-pic">
+            <div class="intro">
+                <h1>Hi, I'm Ali 👋</h1>
+                <p>Digital Creator | Software Developer | Building things with code.</p>
+            </div>
+        </div>
+
+        <section id="about">
+            <h2>Bio</h2>
+            <div class="card">
+                <p>I'm a passionate developer focused on the intersection of modern web technologies and intuitive design. I specialize in full-stack development using modern frameworks, but I always prioritize creating beautiful, accessible, and performant user experiences.</p>
+                <p>When I'm not coding, you can find me exploring new open-source projects or contributing to the tech community.</p>
+                <p>
+                    <a href="mailto:your.email@example.com">Email Me</a> | 
+                    <a href="https://www.linkedin.com/in/yourprofile">LinkedIn</a> | 
+                    <a href="https://twitter.com/yourhandle">Twitter</a>
+                </p>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Projects</h2>
+
+            <div class="card">
+                <h3>Project Title One</h3>
+                <p>A description of your most important project. Mention the technologies used (e.g., React, Python, Docker). </p>
+                <a href="https://github.com/AliNasrollahpour/project-one" target="_blank">View on GitHub →</a>
+            </div>
+
+            <div class="card">
+                <h3>Project Title Two</h3>
+                <p>Another key project showing a different skill set (e.g., mobile development, data visualization, design system).</p>
+                <a href="https://github.com/AliNasrollahpour/project-two" target="_blank">View on GitHub →</a>
+            </div>
+
+            </section>
+
+        <footer>
+            &copy; 2025 Ali Nasrollahpour. All Rights Reserved. Built with simple HTML & love.
+        </footer>
+
+    </div>
+
+    <script>
+        const body = document.body;
+        const toggleButton = document.getElementById('mode-toggle');
+
+        // Check local storage for preference, default to dark-mode
+        const currentMode = localStorage.getItem('mode') || 'dark';
+
+        if (currentMode === 'dark') {
+            body.classList.add('dark-mode');
+            toggleButton.textContent = '☀️'; // Sun for light mode
+        } else {
+            body.classList.remove('dark-mode');
+            toggleButton.textContent = '💡'; // Bulb for dark mode
+        }
+
+        toggleButton.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            // Save preference to local storage
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('mode', 'dark');
+                toggleButton.textContent = '☀️';
+            } else {
+                localStorage.setItem('mode', 'light');
+                toggleButton.textContent = '💡';
+            }
+        });
+    </script>
+
+</body>
+</html>>
