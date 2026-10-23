@@ -23,7 +23,7 @@
 
             "home.pageTitle": "Fight for Knowledge",
             "home.eyebrow": "Fight for Knowledge",
-            "home.heading": "Four rooms. Four voices. One way out.",
+            "home.heading": "Four rooms. Four keepers. One way out.",
             "home.lead":
                 "Each room is kept by a different personality. They know the answers. None of them " +
                 "will hand them over — so pick the one you can stand talking to the longest.",
@@ -86,7 +86,7 @@
 
             "home.pageTitle": "مبارزه برای دانش",
             "home.eyebrow": "مبارزه برای دانش",
-            "home.heading": "چهار اتاق. چهار صدا. یک راه خروج.",
+            "home.heading": "چهار اتاق. چهار نگهبان. یک راه خروج.",
             "home.lead":
                 "هر اتاق را شخصیتی متفاوت نگهبانی می‌دهد. آن‌ها جواب‌ها را می‌دانند، اما هیچ‌کدام " +
                 "لو نمی‌دهند — پس همانی را انتخاب کن که می‌توانی بیشتر با او حرف بزنی.",

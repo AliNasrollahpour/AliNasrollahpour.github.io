@@ -15,10 +15,10 @@ window.FFK_CHARACTERS = {
         tagline: "Friendly, clumsy, sorry about all of it.",
         taglineFa: "مهربان، دست‌وپاچلفتی، و از همه‌چیزش عذرخواهی می‌کند.",
         blurb:
-            "She knows every answer in the room and is hopeless at saying them. Helpful in the worst way " +
+            "She knows every answer in the room and is hopeless at writing them down. Helpful in the worst way " +
             "possible, and terrified of one particular door.",
         blurbFa:
-            "همهٔ جواب‌های اتاق را می‌داند و در گفتنشان کاملاً بی‌عرضه است. به بدترین شکلِ ممکن کمک می‌کند، " +
+            "همهٔ جواب‌های اتاق را می‌داند و در نوشتنشان کاملاً بی‌عرضه است. به بدترین شکلِ ممکن کمک می‌کند، " +
             "و از یک درِ خاص می‌ترسد.",
     },
     evy: {
@@ -30,10 +30,10 @@ window.FFK_CHARACTERS = {
         tagline: "Quiet. Withdrawn. Quietly possessive.",
         taglineFa: "ساکت. گوشه‌گیر. کمی مالکانه.",
         blurb:
-            "One or two lines at a time. She wants you to work alone, and she measures trust in minutes " +
-            "spent talking to her — not in promises.",
+            "One or two lines at a time. She wants you to work alone, and she measures trust in the " +
+            "messages you send her — not in promises.",
         blurbFa:
-            "هر بار یکی دو خط. می‌خواهد تنها کار کنی، و اعتماد را با دقایقی که با او حرف می‌زنی می‌سنجد " +
+            "هر بار یکی دو خط. می‌خواهد تنها کار کنی، و اعتماد را با پیام‌هایی که به او می‌فرستی می‌سنجد " +
             "— نه با قول و قرار.",
     },
     devan: {
@@ -42,14 +42,14 @@ window.FFK_CHARACTERS = {
         room: 3,
         roomNumber: 3,
         accent: "#b45309",
-        tagline: "Bored. Restless. Talks too much on purpose.",
-        taglineFa: "حوصله‌سررفته. بی‌قرار. عمداً زیاد حرف می‌زند.",
+        tagline: "Bored. Restless. Types too much on purpose.",
+        taglineFa: "حوصله‌سررفته. بی‌قرار. عمداً زیاد می‌نویسد.",
         blurb:
-            "A voice with too much time and nothing to spend it on. He buries the truth in chatter, " +
-            "dares you to trust him, and is delighted when you don't.",
+            "All text, all day — there is no speaker in his room. He has too much time and no one to " +
+            "spend it on, buries the truth in chatter, and is delighted when you don't trust him.",
         blurbFa:
-            "صدایی با وقتِ زیادی که نمی‌داند با آن چه کند. حقیقت را لای پرحرفی دفن می‌کند، تو را به " +
-            "اعتماد به خودش دعوت می‌کند و وقتی باورش نکنی کیف می‌کند.",
+            "همه‌چیزش متن است؛ توی اتاقش هیچ بلندگویی نیست. وقتیِ زیادی دارد و کسی برای خرجکردنش، " +
+            "حقیقت را لای پرحرفی دفن می‌کند و وقتی به او اعتماد نکنی کیف می‌کند.",
     },
     echo: {
         slug: "echo",
