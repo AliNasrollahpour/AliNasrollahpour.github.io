@@ -1,0 +1,26 @@
+{
+  "name": "fight-for-knowledge-3d",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "placeholders": "node scripts/make-placeholders.mjs",
+    "publish:root": "npm run build && node scripts/publish-root.mjs"
+  },
+  "dependencies": {
+    "three": "0.169.0"
+  },
+  "devDependencies": {
+    "@types/three": "0.169.0",
+    "typescript": "5.8.3",
+    "vite": "6.3.5",
+    "vitest": "3.1.4"
+  },
+  "overrides": {
+    "rollup": "4.62.4"
+  }
+}
