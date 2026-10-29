@@ -1526,7 +1526,7 @@ export function buildWorld(): World {
     hatchPivot.add(rbox(0.05, 0.028, 0.016, '#8a9199', 0.36, 0, 0.018, { metalness: 0.8 }, 0.005));
     face.add(hatchPivot);
 
-    register(room, 'special:HATCH', hatchPivot, 'درپوش پهلوی سکو', 0.3, (s) => !s.hatchOpen);
+    register(room, 'special:HATCH', hatchPivot, 'درپوش پهلوی سکو', 0.3);
     register(room, 'special:SAFETY_PROTOCOL', btn, 'CORE SAFETY PROTOCOL', 0.24, (s) => s.hatchOpen);
     syncers.push((s) => {
       anim(hatchPivot, 'ry', s.hatchOpen ? -1.55 : 0);

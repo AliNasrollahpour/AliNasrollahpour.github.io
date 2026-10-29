@@ -19,9 +19,10 @@ export function showIntro(onStart: (mode: Mode) => void) {
         h('h3', {}, t('chatConfig')),
         settingsForm()),
       h('div', { class: 'intro-actions' },
-        h('button', { class: 'btn big', onclick: () => onStart('play') }, h('b', {}, t('start')), h('small', {}, t('startHint')))),
-      h('details', { class: 'briefing', dir: 'rtl', lang: 'fa', open: true },
-        h('summary', {}, t('briefingTitle')),
+        h('button', { class: 'btn big', onclick: () => onStart('guide') }, t('start')),
+        h('p', { class: 'start-hint' }, t('startHint'))),
+      h('section', { class: 'briefing', dir: 'rtl', lang: 'fa' },
+        h('h3', {}, t('briefingTitle')),
         ...paras)),
   );
   root.dir = 'rtl';

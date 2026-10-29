@@ -4,8 +4,9 @@ import { gameData, puzzleById, keyById, coinById, clueById, roomById, doorById, 
 import { setLang, t } from './data/i18n';
 import { GameState, type Mode } from './game/GameState';
 import { interactDoor, sideFor } from './game/DoorLogic';
-import { collectKey, findCoin, insertKeys, openHatch, pressProtocol, skip, type SubmitResult } from './game/PuzzleController';
+import { collectKey, findCoin, insertKeys, toggleHatch, pressProtocol, skip, type SubmitResult } from './game/PuzzleController';
 import { sound } from './game/Sound';
+import { loadTheme, saveTheme, applyTheme, type Theme } from './game/Settings';
 import { Stage } from './engine/Scene';
 import type { Interactable } from './engine/Rooms';
 import { h, toast, openPanel, closePanel } from './ui/dom';
@@ -20,6 +21,8 @@ import { puzzleImage, canvasImage } from './ui/PuzzleImage';
 import { blackboardCanvas, adsCanvas, liarCanvas, noteCanvas, loadCanvasFonts } from './engine/textures';
 
 setLang();
+let theme: Theme = loadTheme();
+applyTheme(theme);
 const state = new GameState();
 
 // صحنه بعد از لود فونت‌ها ساخته می‌شود تا نوشته‌های کانواسی دیوارها با Paradox کشیده شوند.
@@ -199,9 +202,11 @@ function interact(it: Interactable) {
         return; // برد → صفحه پایان از طریق state.on
       }
       if (id === 'HATCH') {
-        openHatch(state);
+        const open = toggleHatch(state);
         sound.door();
-        return toast('زیر دریچه یک دکمه قرمز است: CORE SAFETY PROTOCOL', 'err', 5000);
+        return open
+          ? toast('پشت درپوش یک دکمه قرمز است: CORE SAFETY PROTOCOL', 'err', 5000)
+          : toast('درپوش را دوباره بستی.', 'info', 2600);
       }
       if (id === 'SAFETY_PROTOCOL') return pressProtocol(state);
       return;
@@ -248,15 +253,23 @@ const hud = new Hud(state, {
   settings: openSettings,
   restart: () => restart(),
   goRoom: (room) => goToRoom(room),
+  toggleTheme: () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(theme);
+    saveTheme(theme);
+    state.emit();
+  },
+  theme: () => theme,
 });
 
-function start(mode: Mode) {
+function start(mode: Mode = 'guide') {
   state.reset(mode);
   hideIntro();
   hud.render();
   sound.click();
-  stage.enterRoom(state.room);
-  toast(`${t('operative')} ${state.active.name} — ${roomName(state.room)}`, 'info', 3000);
+  // همیشه از نمای کلی نقشه شروع می‌کنیم، نه از داخل یک اتاق
+  stage.overview();
+  if (mode === 'guide') toast(t('guideLegend'), 'info', 5000);
 }
 
 function restart() {

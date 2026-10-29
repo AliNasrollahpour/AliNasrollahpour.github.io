@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS: ChatSettings = {
 };
 
 const KEY = 'ffk3d.chat';
+const THEME_KEY = 'ffk3d.theme';
 
 export function loadSettings(): ChatSettings {
   try {
@@ -39,4 +40,33 @@ export function saveSettings(s: ChatSettings) {
   } catch {
     /* نادیده */
   }
+}
+
+export type Theme = 'dark' | 'light';
+
+/** تم فقط لایه DOM را عوض می‌کند؛ صحنه سه‌بعدی ثابت می‌ماند. */
+export function loadTheme(): Theme {
+  try {
+    const v = localStorage.getItem(THEME_KEY);
+    if (v === 'dark' || v === 'light') return v;
+  } catch {
+    /* نادیده */
+  }
+  try {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
+export function saveTheme(theme: Theme) {
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    /* نادیده */
+  }
+}
+
+export function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
 }

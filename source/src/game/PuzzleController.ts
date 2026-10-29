@@ -131,9 +131,11 @@ export function insertKeys(state: GameState): InsertResult {
   return { kind: 'inserted', count, total };
 }
 
-export function openHatch(state: GameState) {
-  state.hatchOpen = true;
+/** درپوش پهلوی سکو باز/بسته می‌شود؛ بستنش دکمه پروتکل را دوباره می‌پوشاند. */
+export function toggleHatch(state: GameState): boolean {
+  state.hatchOpen = !state.hatchOpen;
   state.emit();
+  return state.hatchOpen;
 }
 
 export function pressProtocol(state: GameState) {

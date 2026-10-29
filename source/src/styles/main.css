@@ -12,7 +12,11 @@
   font-display: block;
 }
 
+/* تم فقط روی لایه DOM اثر دارد. صحنه سه‌بعدی رنگ‌هایش را از خود کد می‌گیرد
+   و با تم عوض نمی‌شود؛ پس برچسب‌ها و تول‌تیپ‌هایی که مستقیم روی بوم می‌نشینند
+   در هر دو تم تیره می‌مانند تا روی صحنه تیره خوانا باشند. */
 :root {
+  color-scheme: dark;
   --bg: #0b0d12;
   --panel: #151922;
   --panel-2: #1c212c;
@@ -25,12 +29,50 @@
   --key: #f2c94c;
   --radius: 12px;
   --font: 'Peyda', Tahoma, system-ui, sans-serif;
+
+  --scrim: #0b0d12;
+  --scrim-strong: #0b0d12f0;
+  --scrim-soft: #0b0d12d9;
+  --scrim-none: #0b0d1200;
+  --intro-glow: #2a1418;
+  --accent-glow: #e5484d40;
+  --code-bg: #ffffff1a;
+  --end-scrim: #000000cc;
+  --shadow: 0 18px 50px #00000080;
+  /* روکش‌های روی بوم سه‌بعدی: در هر دو تم ثابت */
+  --overlay-bg: #0b0d12cc;
+  --overlay-text: #e6e9ef;
+  --overlay-line: #2c3342;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #eef1f6;
+  --panel: #ffffff;
+  --panel-2: #f3f5f9;
+  --line: #d4dae5;
+  --text: #161c27;
+  --muted: #5d6a80;
+  --accent: #c8323a;
+  --ok: #178c4e;
+  --warn: #9a6400;
+  --key: #9a7a10;
+
+  --scrim: #eef1f6;
+  --scrim-strong: #eef1f6f2;
+  --scrim-soft: #ffffffe6;
+  --scrim-none: #eef1f600;
+  --intro-glow: #ffdfe1;
+  --accent-glow: #c8323a33;
+  --code-bg: #0000000f;
+  --end-scrim: #0b0d1299;
+  --shadow: 0 18px 50px #161c2726;
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); }
 button, input, select, textarea { font: inherit; color: inherit; }
-code { font-family: ui-monospace, Consolas, monospace; background: #0003; padding: 1px 6px; border-radius: 6px; }
+code { font-family: ui-monospace, Consolas, monospace; background: var(--code-bg); padding: 1px 6px; border-radius: 6px; }
 
 #stage { position: fixed; inset: 0; }
 #stage canvas { display: block; touch-action: none; }
@@ -41,7 +83,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 /* ───────── برچسب‌ها و نشان‌ها ───────── */
 .room-label {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  background: #0b0d12cc; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--overlay-bg); color: var(--overlay-text); border: 1px solid var(--overlay-line); border-radius: 10px;
   padding: 6px 10px; font-size: 13px; white-space: nowrap; backdrop-filter: blur(6px);
 }
 .room-label.active { border-color: var(--warn); }
@@ -62,14 +104,14 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 @keyframes pulse { 50% { box-shadow: 0 0 0 2px #fff, 0 0 0 7px #2f80ed40; } }
 .tooltip {
   position: fixed; z-index: 30; pointer-events: none; display: none;
-  background: #000c; padding: 4px 10px; border-radius: 8px; font-size: 13px;
+  background: #000c; color: var(--overlay-text); padding: 4px 10px; border-radius: 8px; font-size: 13px;
 }
 
 /* ───────── HUD ───────── */
 #hud {
   position: fixed; top: 0; inset-inline: 0; z-index: 10;
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 10px 14px; background: linear-gradient(#0b0d12f0, #0b0d1200); flex-wrap: wrap;
+  padding: 10px 14px; background: linear-gradient(var(--scrim-strong), var(--scrim-none)); flex-wrap: wrap;
 }
 #hud[hidden] { display: none; }
 .hud-left, .hud-right, .hud-team { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -89,6 +131,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
   background: var(--panel); border: 1px solid var(--line); border-bottom: 3px solid var(--c); border-radius: 10px; padding: 2px 8px;
 }
 .hud-team .op small { font-size: 10px; color: var(--muted); white-space: nowrap; }
+.hud-team .op .ops { font-style: normal; font-size: 9px; line-height: 6px; height: 6px; color: var(--c); letter-spacing: 1px; }
 .hud-team .op.on { background: var(--panel-2); outline: 2px solid var(--c); }
 /* اتاقی که هیچ هم‌تیمی‌ای در آن نیست (فقط در حالت بازی) */
 .hud-team .op.off { opacity: 0.45; }
@@ -102,7 +145,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 
 #roombar {
   position: fixed; bottom: 14px; inset-inline-start: 14px; z-index: 9; max-width: min(480px, calc(100vw - 28px));
-  background: #0b0d12d9; border: 1px solid var(--line); border-inline-start: 4px solid var(--c);
+  background: var(--scrim-soft); border: 1px solid var(--line); border-inline-start: 4px solid var(--c);
   border-radius: var(--radius); padding: 10px 14px; backdrop-filter: blur(8px);
   display: flex; flex-direction: column; gap: 6px;
 }
@@ -242,17 +285,19 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 .toast.key { border-color: var(--key); color: var(--key); }
 
 /* ───────── ورود ───────── */
-#intro { position: fixed; inset: 0; z-index: 50; overflow: auto; background: radial-gradient(ellipse at top, #2a1418 0%, var(--bg) 60%); padding: 32px 16px; }
+#intro { position: fixed; inset: 0; z-index: 50; overflow: auto; background: radial-gradient(ellipse at top, var(--intro-glow) 0%, var(--bg) 60%); padding: 32px 16px; }
 #intro[hidden] { display: none; }
 /* ترتیب DOM = ترتیب موبایل: عنوان → پیکربندی → شروع → راهنما.
    روی دسکتاپ همین‌ها دو ستونه می‌شوند و شروع کنار پیکربندی بالا می‌آید. */
 .intro-card {
   max-width: 1040px; margin: 0 auto;
   display: grid; gap: 16px;
-  grid-template-columns: 1.25fr 1fr;
+  /* minmax(0,…) لازم است: وگرنه متن بلند بریفینگ ستون اول را پهن می‌کند و دکمه شروع لاغر می‌شود */
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   grid-template-areas: 'title title' 'brief start' 'brief config';
   align-content: start;
 }
+.intro-card > * { min-width: 0; }
 .intro-title {
   grid-area: title; margin: 0 0 4px;
   font-family: 'Paradox', var(--font);
@@ -261,23 +306,22 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 }
 .intro-config { grid-area: config; }
 .intro-actions { grid-area: start; align-self: start; }
-.briefing[open] summary { margin-bottom: 10px; }
 .briefing { grid-area: brief; }
 .briefing, .intro-config { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
-.briefing summary { cursor: pointer; color: var(--muted); font-size: 15px; margin-bottom: 10px; }
+.briefing h3 { margin: 0 0 12px; }
 .briefing p { line-height: 2.1; margin: 0 0 12px; }
 .briefing p:last-child { color: #ff8f93; font-weight: 700; }
 .intro-card h3 { margin: 0 0 12px; font-size: 15px; color: var(--muted); }
 .btn.big {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  width: 100%; padding: 20px; font-size: 21px; border-radius: 14px;
+  display: block; width: 100%; padding: 20px 24px;
+  font-size: 22px; font-weight: 800; border-radius: 14px;
   background: var(--accent); color: #fff;
-  box-shadow: 0 10px 30px #e5484d40;
+  box-shadow: 0 10px 30px var(--accent-glow);
 }
-.btn.big small { font-weight: 400; font-size: 13px; opacity: 0.85; }
+.start-hint { margin: 10px 2px 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
 
 /* ───────── پایان ───────── */
-#end { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 16px; background: #000c; backdrop-filter: blur(6px); }
+#end { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 16px; background: var(--end-scrim); backdrop-filter: blur(6px); }
 #end[hidden] { display: none; }
 .end-card { max-width: 540px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 28px; }
 .end.win .end-card { border-color: var(--ok); }

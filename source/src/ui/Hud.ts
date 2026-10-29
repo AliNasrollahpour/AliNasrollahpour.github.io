@@ -11,6 +11,8 @@ export interface HudActions {
   settings: () => void;
   restart: () => void;
   goRoom: (room: RoomId) => void;
+  toggleTheme: () => void;
+  theme: () => 'dark' | 'light';
 }
 
 const fmt = (ms: number) => {
@@ -56,8 +58,10 @@ export class Hud {
             : `${r.title} — ${t('noOperativeHere')}`,
           onclick: () => a.goRoom(r.id),
         },
-        h('b', {}, here.length ? here.map((o) => o.name).join('·') : '—'),
-        h('small', {}, r.title.split('—')[0].trim()));
+        // عدد روی دکمه = شماره خود اتاق؛ حضور هم‌تیمی با نقطه زیر آن نشان داده می‌شود
+        h('b', {}, r.title.replace(/[^۰-۹0-9]/g, '')),
+        h('small', {}, r.title.split('—')[0].trim()),
+        h('i', { class: 'ops', 'aria-hidden': 'true' }, '•'.repeat(here.length)));
       }));
     this.tick();
     this.root.append(
@@ -70,6 +74,7 @@ export class Hud {
       team,
       h('div', { class: 'hud-right' },
         h('button', { class: 'icon-btn', title: t('map'), onclick: a.map }, '🗺'),
+        h('button', { class: 'icon-btn txt', title: t('theme'), onclick: a.toggleTheme }, a.theme() === 'dark' ? t('themeLight') : t('themeDark')),
         h('button', { class: 'icon-btn', title: t('settings'), onclick: a.settings }, '⚙'),
         h('button', { class: 'icon-btn', title: t('restart'), onclick: a.restart }, '↺')),
     );
