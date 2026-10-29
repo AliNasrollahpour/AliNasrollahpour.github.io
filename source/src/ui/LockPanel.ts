@@ -45,7 +45,7 @@ export function openLock(p: Puzzle, ctx: LockCtx) {
     sound.error();
     msg.className = 'lock-msg err';
     msg.textContent =
-      r.reason === 'no-attempts' ? 'مگ‌لاک دیگر گوش نمی‌دهد. دوان حوصله‌اش سر رفته — سکه‌ای پیدا کن و عددش را به او بده.'
+      r.reason === 'no-attempts' ? 'مگ‌لاک دیگر ورودی نمی‌پذیرد. دوان حوصله‌اش سر رفته — سکه‌ای پیدا کن و عددش را به او بده.'
       : r.reason === 'exhausted' ? 'ایستگاه قفل شد. دیگر حدسی پذیرفته نمی‌شود.'
       : r.attemptsLeft !== undefined ? `${t('wrong')} (${t('devanAttempts')}: ${r.attemptsLeft})`
       : t('wrong');
@@ -81,7 +81,7 @@ function control(p: Puzzle, ctx: LockCtx, attempt: (input: string | Dir[]) => bo
       const isText = p.lockType === 'maglock' || /[A-Za-z؀-ۿ]/.test(String(p.solution));
       const input = h('input', {
         class: 'code-input', dir: p.lockType === 'maglock' ? 'rtl' : 'ltr', inputmode: isText ? 'text' : 'numeric',
-        maxlength: p.length ?? 40, placeholder: p.lockType === 'maglock' ? 'اسم را بگو…' : '•'.repeat(p.length ?? 4), autocomplete: 'off',
+        maxlength: p.length ?? 40, placeholder: p.lockType === 'maglock' ? 'نام را وارد کن…' : '•'.repeat(p.length ?? 4), autocomplete: 'off',
       });
       const go = () => input.value.trim() && attempt(input.value) === false && input.select();
       input.addEventListener('keydown', (e) => e.key === 'Enter' && go());

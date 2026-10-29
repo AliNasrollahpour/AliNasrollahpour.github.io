@@ -1,6 +1,13 @@
 // تصویرِ معما از public/assets/puzzles؛ اگر فایلِ تیم نبود یا placeholder بود، نسخهٔ SVGِ بازسازی‌شده نشان داده می‌شود.
 import { h } from './dom';
-import { gameData } from '../data/game-data';
+import { puzzleById } from '../data/game-data';
+import { nnCanvas, mazeCanvas, peopleFallbackCanvas, PLACEHOLDER_MAX } from '../engine/textures';
+
+/** بازسازی‌هایی که روی کانواس کشیده می‌شوند (همان‌هایی که در صحنهٔ سه‌بعدی هم استفاده می‌شوند). */
+const canvasArt = (make: () => HTMLCanvasElement) => () => {
+  const c = make();
+  return `<img src="${c.toDataURL()}" alt="" style="width:100%;display:block">`;
+};
 
 const BASE = `${import.meta.env.BASE_URL}assets/puzzles/`;
 
@@ -11,24 +18,6 @@ const LEGO_SHUFFLE = [4, 0, 6, 2, 3, 1, 5];
 
 function svg(inner: string, w = 360, h = 220) {
   return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img">${inner}</svg>`;
-}
-
-function nnSvg() {
-  const p = gameData.puzzles.find((x) => x.id === 'P40a')!.nn!;
-  const yy = (i: number) => 35 + i * 50;
-  let lines = '';
-  const hidden = [60, 110, 160];
-  for (let i = 0; i < 4; i++) for (const hy of hidden) lines += `<line x1="70" y1="${yy(i)}" x2="180" y2="${hy}" stroke="#9aa5b1" stroke-width="1"/><line x1="180" y1="${hy}" x2="290" y2="${yy(i)}" stroke="#9aa5b1" stroke-width="1"/>`;
-  const node = (x: number, y: number, v?: number) => {
-    const fill = v === undefined ? '#cfd8e3' : `rgba(47,128,237,${0.15 + v * 0.85})`;
-    return `<circle cx="${x}" cy="${y}" r="17" fill="${fill}" stroke="#1e3a5f" stroke-width="1.5"/>` +
-      (v === undefined ? '' : `<text x="${x}" y="${y + 4}" font-size="11" text-anchor="middle" fill="${v > 0.5 ? '#fff' : '#1e3a5f'}" font-family="monospace">${v.toFixed(2)}</text>`);
-  };
-  let nodes = '';
-  p.input.forEach((v, i) => (nodes += node(70, yy(i), v)));
-  hidden.forEach((y) => (nodes += node(180, y)));
-  p.output.forEach((v, i) => (nodes += node(290, yy(i), v)));
-  return svg(`<rect width="360" height="220" fill="#f8fafc"/>${lines}${nodes}<text x="70" y="214" font-size="11" text-anchor="middle" fill="#555">input</text><text x="290" y="214" font-size="11" text-anchor="middle" fill="#555">output</text>`);
 }
 
 function legoSvg() {
@@ -65,20 +54,25 @@ function textSvg(lines: string[]) {
   return svg(`<rect width="360" height="220" fill="#1e293b" stroke="#475569" stroke-dasharray="6 4"/>${t}`);
 }
 
+const nnArt = canvasArt(() => {
+  const nn = puzzleById('P40a')!.nn!;
+  return nnCanvas(nn.input, nn.output);
+});
+
 const FALLBACK: Record<string, () => string> = {
-  'fig-nn.jpg': nnSvg,
-  'fig-pattern.png': nnSvg,
+  'fig-nn.jpg': nnArt,
+  'fig-pattern.png': nnArt,
   'fig-lego.jpeg': legoSvg,
   'fig-scrabble.jpg': () => tilesSvg(['TRESNI', 'EMOH', 'DNE', 'RETNE']),
   'fig-safe2.jpeg': paperSvg,
-  'fig-chess.jpg': () => textSvg(['fig-chess.jpg — تصویرِ تیم', 'سفید حرکت می‌کند و در یک حرکت مات می‌کند.']),
-  'fig-maze.jpeg': () => textSvg(['fig-maze.jpeg — تصویرِ تیم', 'هزارتوی دایره‌ای با چهار علامت']),
+  'fig-maze.jpeg': canvasArt(() => mazeCanvas(512)),
+  'fig-people-1.jpg': canvasArt(() => peopleFallbackCanvas(2, 85)),
+  'fig-people-2.jpg': canvasArt(() => peopleFallbackCanvas(6, 233)),
+  'fig-people-3.jpg': canvasArt(() => peopleFallbackCanvas(14, 529)),
+  'fig-chess.jpg': () => textSvg(['fig-chess.jpg — تصویرِ تیم', 'نوبتِ سیاه؛ سیاه در یک حرکت مات می‌کند.', 'چیدمانِ همین وضعیت روی میزِ وسطِ اتاق ۴ بازسازی شده است.']),
   'fig-switches.jpeg': () => textSvg(['fig-switches.jpeg', 'هفت کلیدِ ۰/۱']),
   'fig-map.jpg': () => textSvg(['fig-map.jpg']),
 };
-
-/** placeholderهای ریپو ۲×۲ پیکسل‌اند؛ هر تصویرِ کوچک‌تر از این آستانه یعنی «هنوز تصویرِ واقعی نیامده». */
-const PLACEHOLDER_MAX = 8;
 
 export function puzzleImage(asset: string, caption?: string): HTMLElement {
   const fig = h('figure', { class: 'puzzle-img' });

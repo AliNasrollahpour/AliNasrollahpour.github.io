@@ -19,7 +19,7 @@ import { showEnd } from './ui/EndScreen';
 import { openRoutes } from './ui/RoutesPanel';
 import { settingsForm } from './ui/SettingsForm';
 import { puzzleImage, canvasImage } from './ui/PuzzleImage';
-import { humansCanvas, blackboardCanvas, adsCanvas, liarCanvas, loadCanvasFonts } from './engine/textures';
+import { blackboardCanvas, adsCanvas, liarCanvas, noteCanvas, loadCanvasFonts } from './engine/textures';
 
 setLang(loadLang());
 const state = new GameState();
@@ -76,23 +76,26 @@ function showCard(id: string) {
   openPanel(c.title, h('div', { class: 'card-text', dir: 'auto' }, ...c.text.split('\n').map((l) => h('p', {}, l))), { kicker: 'داخلِ گاوصندوق' });
 }
 
-function clueArt(art?: string): HTMLElement | null {
+function clueArt(c: { art?: string; asset?: string; text: string }): HTMLElement | null {
+  const art = c.art;
   if (!art) return null;
-  if (art.startsWith('humans:')) {
-    const n = Number(art.split(':')[1]);
-    const style = n === 5 || n === 7 ? 'monitor' : n === 4 ? 'poster' : 'noise';
-    const seed = { 5: 11, 7: 23, 4: 37, 6: 53 }[n] ?? 1;
-    return canvasImage(humansCanvas(n, seed, style));
-  }
+  // قاب‌های عکسِ اتاق ۴: اگر فایلِ تیم آمده باشد، puzzleImage خودش نشانش می‌دهد
+  if (art.startsWith('photo:')) return null;
   if (art === 'blackboard') return canvasImage(blackboardCanvas());
   if (art === 'ads') return canvasImage(adsCanvas());
   if (art === 'liar') return canvasImage(liarCanvas());
+  if (art === 'note') return canvasImage(noteCanvas(c.text.split('\n')));
   return null;
 }
 
 function showClue(id: string) {
   const c = clueById(id)!;
-  openPanel(c.title, h('div', {}, clueArt(c.art), c.asset ? puzzleImage(c.asset, c.title) : null, h('p', { dir: 'auto' }, c.text)), { kicker: roomName(c.roomId) });
+  const art = clueArt(c);
+  openPanel(c.title, h('div', {},
+    art,
+    c.asset ? puzzleImage(c.asset, c.title) : null,
+    // متنِ کاغذ قبلاً روی خودِ تصویر آمده؛ دوباره تکرارش نکن
+    c.art === 'note' ? null : h('p', { dir: 'auto' }, c.text)), { kicker: roomName(c.roomId) });
 }
 
 function showPuzzleClue(id: string) {
@@ -131,7 +134,7 @@ function interact(it: Interactable) {
           if (id === 'VENT') {
             sound.door();
             stage.focusOn(it, 2400);
-            return toast('توری لق بود و کنار رفت. پشتش یک کانالِ تنگ است… دوباره کلیک کن تا بخزی.', 'ok', 4500);
+            return toast('توریِ داکت لق بود و کنار رفت. پشتش یک کانالِ تنگ است که به اتاقِ دیگر می‌رسد — از هر دو سمت. دوباره کلیک کن تا بخزی.', 'ok', 5200);
           }
           return moveTo(res.to);
         case 'puzzle': {

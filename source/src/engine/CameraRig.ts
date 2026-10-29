@@ -4,8 +4,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { RoomId } from '../data/game-data';
 
-const OVERVIEW_POS = new THREE.Vector3(0, 46, 40);
-const OVERVIEW_TARGET = new THREE.Vector3(0, 0, 2);
+// نقشه حالا فشرده است (بدونِ راهرو، اتاق‌ها ۶۰٪): دوربین باید خیلی نزدیک‌تر بنشیند.
+const OVERVIEW_POS = new THREE.Vector3(0, 17.5, 15);
+const OVERVIEW_TARGET = new THREE.Vector3(0, 0, 0.6);
 
 export class CameraRig {
   camera: THREE.PerspectiveCamera;
@@ -34,18 +35,18 @@ export class CameraRig {
   private setLimits(kind: 'overview' | 'room' | 'focus') {
     const c = this.controls;
     if (kind === 'overview') {
-      c.minDistance = 30;
-      c.maxDistance = 90;
+      c.minDistance = 11;
+      c.maxDistance = 34;
       c.minPolarAngle = 0.25;
       c.maxPolarAngle = 1.05;
     } else if (kind === 'room') {
-      c.minDistance = 5;
-      c.maxDistance = 20;
+      c.minDistance = 2.2;
+      c.maxDistance = 9;
       c.minPolarAngle = 0.2;
       c.maxPolarAngle = 1.2;
     } else {
-      c.minDistance = 0.8;
-      c.maxDistance = 8;
+      c.minDistance = 0.35;
+      c.maxDistance = 4;
       c.minPolarAngle = 0.15;
       c.maxPolarAngle = 1.75;
     }
@@ -72,26 +73,26 @@ export class CameraRig {
     const out = room === 'room5' ? new THREE.Vector3(0, 0, 1) : center.clone().setY(0).normalize();
     // در صفحهٔ عمودی (موبایل) دورتر تا عرضِ اتاق جا شود
     const k = this.camera.aspect < 0.8 ? 1.45 : 1;
-    const pos = center.clone().addScaledVector(out, 8.5 * k).setY((room === 'room5' ? 11 : 10) * k);
-    this.tweenTo(pos, center.clone().setY(0.6));
+    const pos = center.clone().addScaledVector(out, 6.0 * k).setY((room === 'room5' ? 7.2 : 6.4) * k);
+    this.tweenTo(pos, center.clone().setY(0.45));
   }
 
   /** نزدیک شدن به یک نقطه (مثلاً قفلِ مرتفع با نردبان). */
   focus(point: THREE.Vector3, roomCenter: THREE.Vector3) {
     this.setLimits('focus');
     const dir = roomCenter.clone().sub(point).setY(0).normalize();
-    this.tweenTo(point.clone().addScaledVector(dir, 2.2).setY(point.y + 0.3), point, 1.1);
+    this.tweenTo(point.clone().addScaledVector(dir, 1.3).setY(point.y + 0.2), point, 1.1);
   }
 
   /** قاب‌بندیِ یک شیء: از سمتِ داخلِ اتاق، با فاصله‌ای متناسب با اندازه‌اش. */
   frame(center: THREE.Vector3, size: number, roomCenter: THREE.Vector3) {
     this.setLimits('focus');
-    const dist = THREE.MathUtils.clamp(size * 1.8 + 1.5, 2.2, 6.5);
+    const dist = THREE.MathUtils.clamp(size * 1.8 + 0.9, 0.85, 3.4);
     let dir = roomCenter.clone().sub(center).setY(0);
-    if (dir.length() < 1.2) dir = this.camera.position.clone().sub(center).setY(0);
+    if (dir.length() < 0.8) dir = this.camera.position.clone().sub(center).setY(0);
     dir.normalize();
     // اشیای دیواری (پوستر، تخته، نمایشگر) تقریباً هم‌ارتفاعِ چشم؛ اشیای روی زمین از بالا
-    const wallMounted = center.y > 1.1;
+    const wallMounted = center.y > 0.75;
     const pos = center.clone().addScaledVector(dir, dist * (wallMounted ? 0.95 : 0.8)).setY(center.y + dist * (wallMounted ? 0.15 : 0.62));
     this.tweenTo(pos, center, 0.85);
   }

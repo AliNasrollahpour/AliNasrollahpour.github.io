@@ -43,7 +43,7 @@ export class Stage {
     host.appendChild(this.labelRenderer.domElement);
 
     this.scene.background = new THREE.Color('#0b0d12');
-    this.scene.fog = new THREE.Fog('#0b0d12', 70, 140);
+    this.scene.fog = new THREE.Fog('#0b0d12', 26, 60);
     // نقشهٔ محیطیِ یک‌باره: فلزها و لبه‌های گرد بازتابِ نرم می‌گیرند، بدونِ هزینهٔ هر فریم.
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;

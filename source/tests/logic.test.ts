@@ -4,7 +4,7 @@ import { gameData, puzzleById, type Dir } from '../src/data/game-data';
 import { GameState } from '../src/game/GameState';
 import { interactDoor } from '../src/game/DoorLogic';
 import {
-  submit, skip, insertKeys, pressProtocol, findCoin, giveCoin, coinsMentioned, devanAttemptsLeft, collectKey,
+  submit, skip, insertKeys, pressProtocol, findCoin, giveCoin, coinsMentioned, devanAttemptsLeft, collectKey, normalize,
 } from '../src/game/PuzzleController';
 import { agentsDoc } from '../src/data/agents';
 import { buildSystemPrompt, devanIsBored } from '../src/game/AgentChat';
@@ -120,12 +120,16 @@ describe('per-side gating (table 6.2)', () => {
   });
 });
 
-describe('secret passage 2 → 1', () => {
-  it('is discovered from room 2 and is one-way', () => {
-    expect(interactDoor(s, 'VENT', 'room1').kind).toBe('wrong-side');
+describe('داکتِ کولر بینِ اتاق ۲ و اتاق ۱', () => {
+  it('باز شدن از اتاق ۲ سمتِ اتاق ۱ را هم باز می‌کند', () => {
     expect(interactDoor(s, 'VENT', 'room2')).toEqual({ kind: 'opened', to: 'room1', push: true });
     expect(interactDoor(s, 'VENT', 'room2')).toEqual({ kind: 'move', to: 'room1' });
-    expect(interactDoor(s, 'VENT', 'room1').kind).toBe('one-way');
+    expect(interactDoor(s, 'VENT', 'room1')).toEqual({ kind: 'move', to: 'room2' });
+  });
+
+  it('از سمتِ اتاق ۱ هم می‌شود کشفش کرد و بعد دوطرفه است', () => {
+    expect(interactDoor(s, 'VENT', 'room1')).toEqual({ kind: 'opened', to: 'room2', push: true });
+    expect(interactDoor(s, 'VENT', 'room2')).toEqual({ kind: 'move', to: 'room1' });
   });
 });
 
@@ -178,6 +182,46 @@ describe('win / lose', () => {
   it('timer runs out → lose', () => {
     s.tick(gameData.lose.timerMinutes * 60_000);
     expect(s.outcome).toBe('lose-timer');
+  });
+});
+
+describe('چیدمانِ نسخهٔ جدید', () => {
+  it('در اتاق مگی فقط P14d و P14e جعبه‌اند؛ بقیهٔ سریِ P روی خودِ در', () => {
+    const r1 = gameData.puzzles.filter((p) => p.roomId === 'room1' && p.mount);
+    expect(r1.filter((p) => p.mount === 'box').map((p) => p.id).sort()).toEqual(['P14d', 'P14e']);
+    expect(r1.filter((p) => p.mount === 'door').length).toBe(10);
+    // قاعدهٔ «۵ از ۷» دست‌نخورده می‌ماند
+    const side = gameData.doors.find((d) => d.id === 'E14')!.sides.find((x) => x.room === 'room1')!;
+    expect(side.minSolved).toBe(5);
+    expect(side.puzzles).toHaveLength(7);
+  });
+
+  it('مقادیرِ شبکهٔ عصبی همان تصویرِ تیم است و جواب عوض نشده', () => {
+    const nn = puzzleById('P40a')!.nn!;
+    expect(nn.input).toEqual([0.73, 0.21, 0.68, 0.34]);
+    expect(nn.output).toEqual([0.81, 0.26, 0.74, 0.33]);
+    expect(puzzleById('P40a')!.solution).toBe('XXOOXXOO');
+  });
+
+  it('آدم‌های سه قابِ اتاق ۴ روی هم ۲۲ نفرند (جوابِ P45b)', () => {
+    const counts = gameData.clues
+      .filter((c) => c.art?.startsWith('photo:'))
+      .map((c) => Number(c.art!.split(':')[1]));
+    expect(counts).toEqual([2, 6, 14]);
+    expect(counts.reduce((a, b) => a + b, 0)).toBe(Number(puzzleById('P45b')!.solution));
+  });
+
+  it('کاغذِ اتاق ۳ متناقض است ولی اسمِ مگ‌لاک در آن آمده', () => {
+    const note = gameData.clues.find((c) => c.id === 'C3note')!;
+    expect(note.roomId).toBe('room3');
+    expect(note.text).toContain('کامران');
+    expect(normalize(note.text)).toContain(normalize(String(puzzleById('D35')!.solution)));
+  });
+
+  it('هیچ‌جای محتوا به میکروفون یا بلند گفتن اشاره نمی‌کند', () => {
+    const blob = JSON.stringify(gameData);
+    expect(blob).not.toMatch(/میکروفون/);
+    expect(blob).not.toMatch(/اسم را بگو/);
   });
 });
 
