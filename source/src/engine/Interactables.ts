@@ -1,4 +1,4 @@
-// raycast، hover (highlight + tooltip) و click روی پراپ‌های اتاقِ فعال یا کفِ اتاق‌ها در نمای نقشه.
+// raycast، hover (highlight + tooltip) و click روی پراپ‌های اتاق فعال یا کف اتاق‌ها در نمای نقشه.
 import * as THREE from 'three';
 import type { RoomId } from '../data/game-data';
 import type { GameState } from '../game/GameState';
@@ -80,7 +80,7 @@ export class Picker {
 
   private up(e: PointerEvent) {
     const moved = Math.hypot(e.clientX - this.down.x, e.clientY - this.down.y);
-    if (moved > 6 || performance.now() - this.down.t > 600) return; // درگِ دوربین، نه کلیک
+    if (moved > 6 || performance.now() - this.down.t > 600) return; // درگ دوربین، نه کلیک
     this.cast(e);
     if (this.state.view) {
       const it = this.pickInteractable();

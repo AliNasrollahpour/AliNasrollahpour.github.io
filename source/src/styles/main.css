@@ -4,7 +4,7 @@
   font-weight: 100 900;
   font-display: swap;
 }
-/* فقط برای نوشته‌های روی دیوارها (تکسچرهای کانواسی)؛ فقط حروفِ فارسی دارد. */
+/* فقط برای نوشته‌های روی دیوارها (تکسچرهای کانواسی)؛ فقط حروف فارسی دارد. */
 @font-face {
   font-family: 'Paradox';
   src: url('../assets/fonts/Paradox-Regular.ttf') format('truetype');
@@ -34,7 +34,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 
 #stage { position: fixed; inset: 0; }
 #stage canvas { display: block; touch-action: none; }
-/* CSS2DRenderer از گوشهٔ بالا-چپ ترجمه می‌کند؛ در صفحهٔ RTL باید لنگر صریح باشد. */
+/* CSS2DRenderer از گوشه بالا-چپ ترجمه می‌کند؛ در صفحه RTL باید لنگر صریح باشد. */
 .label-layer { position: absolute; inset: 0; pointer-events: none; direction: ltr; }
 .label-layer > * { left: 0; top: 0; }
 
@@ -47,7 +47,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 .room-label.active { border-color: var(--warn); }
 .room-label span { font-size: 12px; letter-spacing: 2px; }
 .room-label.secret { color: #7fa7d9; font-size: 11px; letter-spacing: 2px; font-family: monospace; }
-/* transformِ خودِ دکمه را CSS2DRenderer تنظیم می‌کند؛ ظاهر و hover روی .badge-dot است. */
+/* transform خود دکمه را CSS2DRenderer تنظیم می‌کند؛ ظاهر و hover روی .badge-dot است. */
 .badge {
   pointer-events: auto; padding: 6px; margin: 0; border: 0; background: none; cursor: pointer;
   display: block; line-height: 0;
@@ -194,7 +194,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 .guide-box { margin-top: 14px; padding: 10px 12px; border-radius: 10px; background: #2f80ed1f; border: 1px solid #2f80ed55; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.8; }
 .guide-box .btn { align-self: flex-start; }
 
-/* ───────── کارتِ راهنما ───────── */
+/* ───────── کارت راهنما ───────── */
 .guide { display: flex; flex-direction: column; gap: 8px; }
 .g-row { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.8; }
 .g-label { color: var(--muted); font-size: 12px; padding-top: 2px; }
@@ -232,7 +232,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 .room-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; }
 
 /* ───────── toast ───────── */
-/* سمتِ مقابلِ پنل (پنل در inline-end است) تا روی سرتیترش نیفتد */
+/* سمت مقابل پنل (پنل در inline-end است) تا روی سرتیترش نیفتد */
 #toasts { position: fixed; z-index: 40; top: 70px; inset-inline-start: 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; pointer-events: none; width: min(460px, calc(100vw - 28px)); }
 .toast { background: #11151ced; border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; font-size: 14px; line-height: 1.8; text-align: center; animation: drop 0.25s ease-out; transition: opacity 0.3s; }
 .toast.out { opacity: 0; }
@@ -244,18 +244,37 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 /* ───────── ورود ───────── */
 #intro { position: fixed; inset: 0; z-index: 50; overflow: auto; background: radial-gradient(ellipse at top, #2a1418 0%, var(--bg) 60%); padding: 32px 16px; }
 #intro[hidden] { display: none; }
-.intro-card { max-width: 1040px; margin: 0 auto; }
-.intro-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
-.intro-top h1 { font-size: clamp(30px, 6vw, 54px); margin: 4px 0 0; font-weight: 900; letter-spacing: -1px; }
-.intro-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
-.briefing, .intro-grid aside { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+/* ترتیب DOM = ترتیب موبایل: عنوان → پیکربندی → شروع → راهنما.
+   روی دسکتاپ همین‌ها دو ستونه می‌شوند و شروع کنار پیکربندی بالا می‌آید. */
+.intro-card {
+  max-width: 1040px; margin: 0 auto;
+  display: grid; gap: 16px;
+  grid-template-columns: 1.25fr 1fr;
+  grid-template-areas: 'title title' 'brief start' 'brief config';
+  align-content: start;
+}
+.intro-title {
+  grid-area: title; margin: 0 0 4px;
+  font-family: 'Paradox', var(--font);
+  font-size: clamp(34px, 7vw, 64px); font-weight: 400; line-height: 1.25;
+  text-align: center;
+}
+.intro-config { grid-area: config; }
+.intro-actions { grid-area: start; align-self: start; }
+.briefing[open] summary { margin-bottom: 10px; }
+.briefing { grid-area: brief; }
+.briefing, .intro-config { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+.briefing summary { cursor: pointer; color: var(--muted); font-size: 15px; margin-bottom: 10px; }
 .briefing p { line-height: 2.1; margin: 0 0 12px; }
 .briefing p:last-child { color: #ff8f93; font-weight: 700; }
-.intro-grid h3 { margin: 0 0 12px; font-size: 15px; color: var(--muted); }
-.intro-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
-.btn.big { display: flex; flex-direction: column; gap: 4px; padding: 18px; font-size: 18px; border-radius: 14px; }
-.btn.big small { font-weight: 400; font-size: 13px; opacity: 0.7; }
-.btn.big.alt { background: var(--accent); color: #fff; }
+.intro-card h3 { margin: 0 0 12px; font-size: 15px; color: var(--muted); }
+.btn.big {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 100%; padding: 20px; font-size: 21px; border-radius: 14px;
+  background: var(--accent); color: #fff;
+  box-shadow: 0 10px 30px #e5484d40;
+}
+.btn.big small { font-weight: 400; font-size: 13px; opacity: 0.85; }
 
 /* ───────── پایان ───────── */
 #end { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 16px; background: #000c; backdrop-filter: blur(6px); }
@@ -284,7 +303,9 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
   .panel, .panel.wide { width: 100%; border-radius: 16px 16px 0 0; }
   #roombar { bottom: 8px; inset-inline-start: 8px; padding: 8px 10px; }
   #roombar p { display: none; }
-  .intro-grid, .intro-actions { grid-template-columns: 1fr; }
+  /* موبایل: اول پیکربندی ایجنت‌ها، بعد دکمه شروع، و در آخر راهنما */
+  .intro-card { grid-template-columns: 1fr; grid-template-areas: 'title' 'config' 'start' 'brief'; }
+  #intro { padding: 20px 12px 32px; }
   .g-row { grid-template-columns: 1fr; gap: 2px; }
   .chat-log { max-height: 34vh; }
   #toasts { top: 140px; inset-inline: 14px; width: auto; align-items: center; }

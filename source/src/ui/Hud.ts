@@ -1,4 +1,4 @@
-﻿// HUD بالا (حالت، زمان، کلیدها، درها، تیم، دکمه‌ها) و سرتیترِ اتاقِ فعلی.
+﻿// HUD بالا (حالت، زمان، کلیدها، درها، تیم، دکمه‌ها) و سرتیتر اتاق فعلی.
 import { h, put } from './dom';
 import { t } from '../data/i18n';
 import { gameData, roomById, type RoomId } from '../data/game-data';
@@ -43,7 +43,7 @@ export class Hud {
       ...gameData.win.needs.map((k) => h('span', { class: `k${s.keysInserted.has(k) ? ' in' : s.keysFound.has(k) ? ' found' : ''}` }, '🗝')),
       h('b', {}, `${s.keysFound.size}/${gameData.win.needs.length}`));
     const doors = h('div', { class: 'hud-doors', title: 'درهای باز' }, '🚪 ', h('b', {}, `${s.openEdges.size}/${gameData.doors.length}`));
-    // هر پنج اتاق در نوارِ بالا؛ عددِ روی دکمه = تعدادِ هم‌تیمی‌های داخلِ آن اتاق
+    // هر پنج اتاق در نوار بالا؛ عدد روی دکمه = تعداد هم‌تیمی‌های داخل آن اتاق
     const team = h('div', { class: 'hud-team', role: 'group', 'aria-label': t('team') },
       ...gameData.rooms.map((r) => {
         const here = s.opsIn(r.id);
@@ -62,7 +62,6 @@ export class Hud {
     this.tick();
     this.root.append(
       h('div', { class: 'hud-left' },
-        h('div', { class: 'brand' }, 'FFK'),
         h('div', { class: 'seg', role: 'group' },
           h('button', { class: s.mode === 'play' ? 'on' : '', onclick: () => s.mode !== 'play' && a.toggleMode() }, t('modePlay')),
           h('button', { class: s.mode === 'guide' ? 'on' : '', onclick: () => s.mode !== 'guide' && a.toggleMode() }, t('modeGuide'))),
@@ -75,7 +74,7 @@ export class Hud {
         h('button', { class: 'icon-btn', title: t('restart'), onclick: a.restart }, '↺')),
     );
 
-    // سرتیترِ اتاق
+    // سرتیتر اتاق
     this.roomBar.innerHTML = '';
     if (s.view) {
       const r = roomById(s.view);
@@ -90,8 +89,8 @@ export class Hud {
       this.roomBar.style.setProperty('--c', '#7c8aa0');
       put(this.roomBar, h('div', {}, h('b', {}, t('map')),
         h('p', {}, s.mode === 'guide'
-          ? 'روی هر اتاق کلیک کن تا آزادانه به آن بروی. 🟢 درِ باز · 🟠 قابل‌بازشدن از این سمت · 🔴 از این سمت بسته.'
-          : `هم‌تیمیِ فعال: ${s.active.name} — ${roomById(s.room).title}. روی اتاقی کلیک کن که یکی از هم‌تیمی‌ها در آن است.`)));
+          ? 'روی هر اتاق کلیک کن تا آزادانه به آن بروی. 🟢 در باز · 🟠 قابل‌بازشدن از این سمت · 🔴 از این سمت بسته.'
+          : `هم‌تیمی فعال: ${s.active.name} — ${roomById(s.room).title}. روی اتاقی کلیک کن که یکی از هم‌تیمی‌ها در آن است.`)));
     }
   }
 }

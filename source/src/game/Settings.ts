@@ -1,4 +1,4 @@
-// پیکربندیِ چت و زبان در localStorage — همیشه با try/catch (حالت خصوصی، Pages، پیش‌نمایش).
+// پیکربندی چت و زبان در localStorage — همیشه با try/catch (حالت خصوصی، Pages، پیش‌نمایش).
 
 export interface ChatSettings {
   provider: string;

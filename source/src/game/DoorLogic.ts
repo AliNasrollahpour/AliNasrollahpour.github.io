@@ -1,4 +1,4 @@
-// گیتینگِ per-side درها (BUILD_SPEC بخش ۶.۲ و ۷). همه‌چیز از gameData.doors خوانده می‌شود.
+// گیتینگ per-side درها (BUILD_SPEC بخش ۶.۲ و ۷). همه‌چیز از gameData.doors خوانده می‌شود.
 import { gameData, doorById, type DoorEdge, type DoorSide, type RoomId } from '../data/game-data';
 import type { GameState } from './GameState';
 
@@ -44,7 +44,7 @@ export function canTraverse(edge: DoorEdge, from: RoomId) {
   return !edge.oneWay || edge.between[0] === from;
 }
 
-/** کلیک روی یک در از اتاقِ `room`. درهای هل‌دادنی را همان‌جا باز می‌کند. */
+/** کلیک روی یک در از اتاق `room`. درهای هل‌دادنی را همان‌جا باز می‌کند. */
 export function interactDoor(state: GameState, edgeId: string, room: RoomId): DoorAction {
   const edge = doorById(edgeId);
   if (!edge) throw new Error(`unknown door ${edgeId}`);

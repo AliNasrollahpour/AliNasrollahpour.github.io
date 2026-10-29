@@ -1,4 +1,4 @@
-// ترمینالِ چت با ایجنتِ هر اتاق + پنلِ شخصیت در حالت راهنما + قاعدهٔ توکنِ Devan.
+// ترمینال چت با ایجنت هر اتاق + پنل شخصیت در حالت راهنما + قاعده توکن Devan.
 import { h, openPanel, mdLite, toast } from './dom';
 import { t } from '../data/i18n';
 import { agentByRoom, gameData, roomById, coinById, type RoomId } from '../data/game-data';
@@ -24,7 +24,7 @@ export function openChat(room: RoomId, state: GameState, openSettings: () => voi
 
   const render = () => {
     log.innerHTML = '';
-    if (!history.length) log.append(h('div', { class: 'msg system-note' }, `${agent.displayName} پشتِ صفحه منتظر است.`));
+    if (!history.length) log.append(h('div', { class: 'msg system-note' }, `${agent.displayName} پشت صفحه منتظر است.`));
     for (const m of history) log.append(bubble(m.role, m.content));
     if (busy) log.append(h('div', { class: 'msg assistant typing' }, h('i'), h('i'), h('i')));
     log.scrollTop = log.scrollHeight;
@@ -41,7 +41,7 @@ export function openChat(room: RoomId, state: GameState, openSettings: () => voi
         status.append(h('button', {
           class: 'pill btnish', onclick: () => {
             if (giveCoin(state, c.id)) {
-              history.push({ role: 'system-note', content: `سکهٔ ${c.value} را به دوان دادی. +۱ تلاش.` });
+              history.push({ role: 'system-note', content: `سکه ${c.value} را به دوان دادی. +۱ تلاش.` });
               history.push({ role: 'user', content: `این سکه رو پیدا کردم: ${c.value}` });
               sound.key();
               render();
@@ -64,12 +64,12 @@ export function openChat(room: RoomId, state: GameState, openSettings: () => voi
 
     if (room === 'room3') {
       for (const id of coinsMentioned(state, text)) {
-        history.push({ role: 'system-note', content: `سکهٔ ${coinById(id)!.value} به دوان داده شد. +۱ تلاش.` });
+        history.push({ role: 'system-note', content: `سکه ${coinById(id)!.value} به دوان داده شد. +۱ تلاش.` });
         sound.key();
       }
     }
 
-    // قاعدهٔ Devan در منطق: بعد از اتمامِ سقف، بدونِ تماسِ شبکه بی‌روح جواب می‌دهد.
+    // قاعده Devan در منطق: بعد از اتمام سقف، بدون تماس شبکه بی‌روح جواب می‌دهد.
     if (devanIsBored(room, state)) {
       history.push({ role: 'assistant', content: boredReply() });
       render();
@@ -126,6 +126,6 @@ export function openChat(room: RoomId, state: GameState, openSettings: () => voi
     wide: true, kicker: roomById(room).title,
     onClose: () => ctrl?.abort(),
   });
-  // در حالت راهنما پنلِ شخصیت اول دیده شود؛ فوکوس باعث اسکرول به پایین می‌شد.
+  // در حالت راهنما پنل شخصیت اول دیده شود؛ فوکوس باعث اسکرول به پایین می‌شد.
   if (state.mode === 'play') setTimeout(() => input.focus(), 60);
 }

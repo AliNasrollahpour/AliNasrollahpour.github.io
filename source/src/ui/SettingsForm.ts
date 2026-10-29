@@ -1,4 +1,4 @@
-// فرمِ پیکربندیِ چت. کلید فقط در localStorage ذخیره می‌شود و هیچ مقدارِ پیش‌فرضی ندارد.
+// فرم پیکربندی چت. کلید فقط در localStorage ذخیره می‌شود و هیچ مقدار پیش‌فرضی ندارد.
 import { h, toast } from './dom';
 import { t } from '../data/i18n';
 import { PROVIDERS, loadSettings, saveSettings } from '../game/Settings';

@@ -1,4 +1,4 @@
-// ابزارهای کوچکِ DOM: سازندهٔ عنصر، پنلِ کناری، toast، و markdownِ سبک.
+// ابزارهای کوچک DOM: سازنده عنصر، پنل کناری، toast، و markdown سبک.
 import { t } from '../data/i18n';
 
 type Child = Node | string | number | null | undefined | false;
@@ -18,7 +18,7 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<s
   return el;
 }
 
-/** مثلِ append ولی null/false را نادیده می‌گیرد. */
+/** مثل append ولی null/false را نادیده می‌گیرد. */
 export function put(el: HTMLElement, ...children: Child[]) {
   for (const c of children) if (c !== null && c !== undefined && c !== false) el.append(c instanceof Node ? c : String(c));
   return el;
@@ -26,7 +26,7 @@ export function put(el: HTMLElement, ...children: Child[]) {
 
 export const esc =(s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-/** markdownِ خیلی سبک برای متن‌های AGENTS.md: پاراگراف، **پررنگ**، `کد`، نقل‌قول. */
+/** markdown خیلی سبک برای متن‌های AGENTS.md: پاراگراف، **پررنگ**، `کد`، نقل‌قول. */
 export function mdLite(src: string): string {
   return src
     .trim()

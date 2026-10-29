@@ -22,14 +22,14 @@ import { blackboardCanvas, adsCanvas, liarCanvas, noteCanvas, loadCanvasFonts } 
 setLang();
 const state = new GameState();
 
-// صحنه بعد از لودِ فونت‌ها ساخته می‌شود تا نوشته‌های کانواسیِ دیوارها با Paradox کشیده شوند.
+// صحنه بعد از لود فونت‌ها ساخته می‌شود تا نوشته‌های کانواسی دیوارها با Paradox کشیده شوند.
 let stage!: Stage;
 
 const roomName = (r: RoomId) => roomById(r).title;
 
 // ───────── ناوبری ─────────
 function goToRoom(room: RoomId) {
-  // راهنما: پرشِ آزادِ دوربین، بدونِ جابه‌جا کردنِ هم‌تیمی‌ها (وگرنه چیدمانِ تیم خراب می‌شود)
+  // راهنما: پرش آزاد دوربین، بدون جابه‌جا کردن هم‌تیمی‌ها (وگرنه چیدمان تیم خراب می‌شود)
   if (state.mode === 'guide') {
     state.selectOpIn(room);
     stage.enterRoom(room);
@@ -44,13 +44,13 @@ function goToRoom(room: RoomId) {
 
 function moveTo(to: RoomId) {
   sound.door();
-  // فقط در حالت بازی کسی واقعاً از در رد می‌شود؛ در حالت راهنما دوربین تنها می‌رود.
+  // فقط در حالت بازی کسی واقعا از در رد می‌شود؛ در حالت راهنما دوربین تنها می‌رود.
   if (state.mode === 'play') state.moveActive(to);
   stage.enterRoom(to);
   toast(`→ ${roomName(to)}`, 'info', 1800);
 }
 
-// ───────── نتیجهٔ معماها ─────────
+// ───────── نتیجه معماها ─────────
 function onResult(_p: unknown, r: SubmitResult) {
   if (!r.ok) return;
   for (const e of r.opened) {
@@ -72,13 +72,13 @@ function skipPuzzle(id: string) {
 function showCard(id: string) {
   const c = gameData.cards[id];
   if (!c) return;
-  openPanel(c.title, h('div', { class: 'card-text', dir: 'auto' }, ...c.text.split('\n').map((l) => h('p', {}, l))), { kicker: 'داخلِ گاوصندوق' });
+  openPanel(c.title, h('div', { class: 'card-text', dir: 'auto' }, ...c.text.split('\n').map((l) => h('p', {}, l))), { kicker: 'داخل گاوصندوق' });
 }
 
 function clueArt(c: { art?: string; asset?: string; text: string }): HTMLElement | null {
   const art = c.art;
   if (!art) return null;
-  // قاب‌های عکسِ اتاق ۴: اگر فایلِ تیم آمده باشد، puzzleImage خودش نشانش می‌دهد
+  // قاب‌های عکس اتاق ۴: اگر فایل تیم آمده باشد، puzzleImage خودش نشانش می‌دهد
   if (art.startsWith('photo:')) return null;
   if (art === 'blackboard') return canvasImage(blackboardCanvas());
   if (art === 'ads') return canvasImage(adsCanvas());
@@ -93,7 +93,7 @@ function showClue(id: string) {
   openPanel(c.title, h('div', {},
     art,
     c.asset ? puzzleImage(c.asset, c.title) : null,
-    // متنِ کاغذ قبلاً روی خودِ تصویر آمده؛ دوباره تکرارش نکن
+    // متن کاغذ قبلا روی خود تصویر آمده؛ دوباره تکرارش نکن
     c.art === 'note' ? null : h('p', { dir: 'auto' }, c.text)), { kicker: roomName(c.roomId) });
 }
 
@@ -106,8 +106,8 @@ function showPuzzleClue(id: string) {
 function interact(it: Interactable) {
   const [kind, id] = it.id.split(':') as [string, string];
   const room = state.view!;
-  // در حالت بازی، تعامل فقط از طرفِ هم‌تیمی‌ای که واقعاً در این اتاق است ممکن است.
-  // (قبلاً هر کلیکی هم‌تیمیِ فعال را به اتاقِ دیده‌شده می‌کشاند و چیدمانِ تیم خراب می‌شد.)
+  // در حالت بازی، تعامل فقط از طرف هم‌تیمی‌ای که واقعا در این اتاق است ممکن است.
+  // (قبلا هر کلیکی هم‌تیمی فعال را به اتاق دیده‌شده می‌کشاند و چیدمان تیم خراب می‌شد.)
   if (state.mode === 'play' && state.room !== room && !state.selectOpIn(room)) {
     return toast(t('noOperativeHere'), 'info');
   }
@@ -121,7 +121,7 @@ function interact(it: Interactable) {
       if (p.lockType === 'clue') return showPuzzleClue(id);
       if (state.solved.has(id)) {
         if (p.reward?.card) return showCard(p.reward.card);
-        return toast(p.isFake ? 'باز است — و خالی.' : 'این یکی قبلاً باز شده.', 'info');
+        return toast(p.isFake ? 'باز است — و خالی.' : 'این یکی قبلا باز شده.', 'info');
       }
       return openLock(p, { state, onResult });
     }
@@ -137,7 +137,7 @@ function interact(it: Interactable) {
           if (id === 'VENT') {
             sound.door();
             stage.focusOn(it, 2400);
-            return toast('توریِ داکت لق بود و کنار رفت. پشتش یک کانالِ تنگ است که به اتاقِ دیگر می‌رسد — از هر دو سمت. دوباره کلیک کن تا بخزی.', 'ok', 5200);
+            return toast('توری داکت لق بود و کنار رفت. پشتش یک کانال تنگ است که به اتاق دیگر می‌رسد — از هر دو سمت. دوباره کلیک کن تا بخزی.', 'ok', 5200);
           }
           return moveTo(res.to);
         case 'puzzle': {
@@ -152,7 +152,7 @@ function interact(it: Interactable) {
         }
         case 'progress':
           sound.error();
-          return toast(`درِ سنگین تکان نمی‌خورد. ${res.solved} قفل از ${res.needed} لازم باز شده (${res.total} قفلِ واقعی در اتاق).`, 'info', 4500);
+          return toast(`در سنگین تکان نمی‌خورد. ${res.solved} قفل از ${res.needed} لازم باز شده (${res.total} قفل واقعی در اتاق).`, 'info', 4500);
         case 'exhausted':
           sound.error();
           return toast('ایستگاه برای همیشه قفل شده. یک حدس بیشتر نبود.', 'err');
@@ -167,16 +167,16 @@ function interact(it: Interactable) {
     }
 
     case 'key': {
-      if (state.keysFound.has(id)) return toast('چیزِ دیگری این‌جا نیست.', 'info');
+      if (state.keysFound.has(id)) return toast('چیز دیگری این‌جا نیست.', 'info');
       collectKey(state, id);
       sound.key();
       const k = keyById(id)!;
-      const how = k.holder === 'doll' ? 'زیپِ عروسک را باز کردی… ' : k.holder === 'keyboard' ? 'صفحه‌کلید را بلند کردی… ' : '';
+      const how = k.holder === 'doll' ? 'زیپ عروسک را باز کردی… ' : k.holder === 'keyboard' ? 'صفحه‌کلید را بلند کردی… ' : '';
       return toast(`${how}🗝 ${k.title} برداشته شد.`, 'key', 4200);
     }
 
     case 'coin': {
-      if (state.coinsFound.has(id)) return toast('چیزِ دیگری این‌جا نیست.', 'info');
+      if (state.coinsFound.has(id)) return toast('چیز دیگری این‌جا نیست.', 'info');
       findCoin(state, id);
       sound.key();
       return toast(`یک سکه پیدا کردی. رویش نوشته: ${coinById(id)!.value}`, 'key', 5000);
@@ -194,14 +194,14 @@ function interact(it: Interactable) {
         if (r.kind === 'dead') return toast('قفل خاموش است. هسته دیگر به هیچ کلیدی جواب نمی‌دهد.', 'err', 4000);
         if (r.kind === 'inserted') {
           sound.click();
-          return toast(r.count ? `${r.count} کلید از ${r.total} در قفل جا افتاد. بقیه کجاست؟` : 'چهار سوراخِ خالی. هنوز هیچ کلیدی نداری.', 'info', 4000);
+          return toast(r.count ? `${r.count} کلید از ${r.total} در قفل جا افتاد. بقیه کجاست؟` : 'چهار سوراخ خالی. هنوز هیچ کلیدی نداری.', 'info', 4000);
         }
-        return; // برد → صفحهٔ پایان از طریقِ state.on
+        return; // برد → صفحه پایان از طریق state.on
       }
       if (id === 'HATCH') {
         openHatch(state);
         sound.door();
-        return toast('زیرِ دریچه یک دکمهٔ قرمز است: CORE SAFETY PROTOCOL', 'err', 5000);
+        return toast('زیر دریچه یک دکمه قرمز است: CORE SAFETY PROTOCOL', 'err', 5000);
       }
       if (id === 'SAFETY_PROTOCOL') return pressProtocol(state);
       return;
@@ -213,7 +213,7 @@ function interact(it: Interactable) {
         sound.click();
         return toast(state.flashlight ? 'چراغ‌قوه روشن شد. نورش روی میز می‌افتد.' : 'چراغ‌قوه خاموش شد.', 'info', 2200);
       }
-      if (id === 'ladder') return toast('نردبانِ فلزی. قفلِ بالای درِ اتاقِ اصلی فقط با آن دیده می‌شود.', 'info', 3500);
+      if (id === 'ladder') return toast('نردبان فلزی. قفل بالای در اتاق اصلی فقط با آن دیده می‌شود.', 'info', 3500);
   }
 }
 
@@ -276,7 +276,7 @@ async function boot() {
     },
   });
 
-  // تایمر با ساعتِ واقعی جلو می‌رود (فریم‌های کند یا تبِ پس‌زمینه زمان را کش نمی‌دهند).
+  // تایمر با ساعت واقعی جلو می‌رود (فریم‌های کند یا تب پس‌زمینه زمان را کش نمی‌دهند).
   let last = performance.now();
   let acc = 0;
   stage.addFrameHook(() => {

@@ -1,11 +1,11 @@
-// تکسچرهای کانواسی برای پوسترها، برچسب‌ها و نمایشگرها (بدون فایلِ تصویر).
-// نوشته‌های روی دیوار با Paradox؛ Paradox حروفِ لاتین ندارد، پس لاتین به‌طور خودکار با Peyda کشیده می‌شود.
+// تکسچرهای کانواسی برای پوسترها، برچسب‌ها و نمایشگرها (بدون فایل تصویر).
+// نوشته‌های روی دیوار با Paradox؛ Paradox حروف لاتین ندارد، پس لاتین به‌طور خودکار با Peyda کشیده می‌شود.
 import * as THREE from 'three';
 
 export const WALL_FONT = 'Paradox, Peyda, sans-serif';
 export const UI_FONT = 'Peyda, Tahoma, sans-serif';
 
-/** کانواس باید بعد از لودِ فونت‌ها کشیده شود؛ main قبل از ساختِ صحنه این را صبر می‌کند. */
+/** کانواس باید بعد از لود فونت‌ها کشیده شود؛ main قبل از ساخت صحنه این را صبر می‌کند. */
 export function loadCanvasFonts() {
   return Promise.all([
     document.fonts.load(`48px Paradox`, 'سلام'),
@@ -28,13 +28,13 @@ function tex(c: HTMLCanvasElement) {
   return t;
 }
 
-/** فایل‌های placeholderِ ریپو ۲×۲ پیکسل‌اند؛ هر تصویرِ بزرگ‌تر یعنی فایلِ واقعیِ تیم آمده است. */
+/** فایل‌های placeholder ریپو ۲×۲ پیکسل‌اند؛ هر تصویر بزرگ‌تر یعنی فایل واقعی تیم آمده است. */
 export const PLACEHOLDER_MAX = 8;
 export const ASSET_BASE = `${import.meta.env.BASE_URL}assets/puzzles/`;
 
 /**
- * تکسچرِ یک فایلِ تصویرِ تیم. تا وقتی فایلِ واقعی در public/assets/puzzles نیست،
- * نسخهٔ بازسازی‌شده نشان داده می‌شود؛ به‌محضِ آمدنِ فایل، همان تکسچر جایش را می‌گیرد.
+ * تکسچر یک فایل تصویر تیم. تا وقتی فایل واقعی در public/assets/puzzles نیست،
+ * نسخه بازسازی‌شده نشان داده می‌شود؛ به‌محض آمدن فایل، همان تکسچر جایش را می‌گیرد.
  */
 export function assetTexture(file: string, fallback: () => HTMLCanvasElement, fit: 'cover' | 'contain' = 'cover', pad = '#ffffff') {
   const c = fallback();
@@ -56,7 +56,7 @@ export function assetTexture(file: string, fallback: () => HTMLCanvasElement, fi
   return t;
 }
 
-/** وزنِ bold فقط برای Peyda؛ Paradox یک وزن دارد و bold مصنوعی زشتش می‌کند. */
+/** وزن bold فقط برای Peyda؛ Paradox یک وزن دارد و bold مصنوعی زشتش می‌کند. */
 const fontOf = (wall: boolean, size: number, weight = 700) => (wall ? `${size}px ${WALL_FONT}` : `${weight} ${size}px ${UI_FONT}`);
 
 export function textTexture(lines: string[], opts: { w?: number; h?: number; bg?: string; fg?: string; size?: number; dir?: 'rtl' | 'ltr'; wall?: boolean } = {}) {
@@ -95,7 +95,7 @@ export function adsCanvas() {
   g.font = fontOf(true, 140);
   g.fillText('۱۰۰٪', 256, 390);
   g.font = fontOf(true, 38);
-  g.fillText('صادق. همیشه. احتمالاً.', 256, 480);
+  g.fillText('صادق. همیشه. احتمالا.', 256, 480);
   g.font = fontOf(true, 28);
   g.fillStyle = 'rgba(255,255,255,0.7)';
   g.fillText('* شرایط و ضوابط اعمال می‌شود', 256, 640);
@@ -106,13 +106,13 @@ export function blackboardCanvas() {
   const [c, g] = canvas(768, 400);
   g.fillStyle = '#1f3a2c';
   g.fillRect(0, 0, 768, 400);
-  // ردِ گچِ پاک‌شده
+  // رد گچ پاک‌شده
   g.fillStyle = 'rgba(255,255,255,0.04)';
   for (let i = 0; i < 6; i++) g.fillRect(60 + i * 110, 40 + (i % 3) * 90, 160, 50);
   g.strokeStyle = '#6b4a2b';
   g.lineWidth = 20;
   g.strokeRect(0, 0, 768, 400);
-  // فقط نمادگذاریِ ریاضی؛ بدونِ هیچ متنِ فارسی (درخواستِ کاربر).
+  // فقط نمادگذاری ریاضی؛ بدون هیچ متن فارسی (درخواست کاربر).
   g.fillStyle = '#e8f0e8';
   g.textAlign = 'center';
   g.direction = 'ltr';
@@ -122,7 +122,7 @@ export function blackboardCanvas() {
   g.fillText('x > 0  ⇔  σ(x) > 0.5', 384, 212);
   g.font = `italic 34px Georgia, serif`;
   g.fillText('active  ⇔  σ(x) > 0.5', 384, 292);
-  // منحنیِ سیگموید، کشیده با گچ
+  // منحنی سیگموید، کشیده با گچ
   g.strokeStyle = 'rgba(232,240,232,0.75)';
   g.lineWidth = 3;
   g.beginPath();
@@ -144,7 +144,7 @@ export function blackboardCanvas() {
   return c;
 }
 
-/** قابِ عکسِ آدم‌ها تا وقتی فایلِ واقعیِ تیم نیامده: n پرترهٔ انتزاعی. */
+/** قاب عکس آدم‌ها تا وقتی فایل واقعی تیم نیامده: n پرتره انتزاعی. */
 export function peopleFallbackCanvas(n: number, seed: number, aspect = 1.5) {
   const W = 640, H = Math.round(640 / aspect);
   const [c, g] = canvas(W, H);
@@ -176,11 +176,11 @@ export function peopleFallbackCanvas(n: number, seed: number, aspect = 1.5) {
   g.textAlign = 'center';
   g.direction = 'rtl';
   g.font = fontOf(false, 22, 700);
-  g.fillText(`${n} نفر — جایگزینِ موقتِ عکسِ تیم`, W / 2, H - 13);
+  g.fillText(`${n} نفر — جایگزین موقت عکس تیم`, W / 2, H - 13);
   return c;
 }
 
-/** کلمه‌های بی‌ربطِ پوسترِ اتاق ۲ — فقط نویز، تا قرمزِ LIAR تنها نشانه بماند. */
+/** کلمه‌های بی‌ربط پوستر اتاق ۲ — فقط نویز، تا قرمز LIAR تنها نشانه بماند. */
 const NOISE_WORDS = [
   'SILENT', 'ORBIT', 'CANDLE', 'RUST', 'MIRROR', 'HOLLOW', 'STATIC', 'EMBER', 'PAPER', 'THIRST',
   'MARBLE', 'VELVET', 'SIGNAL', 'WINTER', 'ANCHOR', 'PLASTER', 'LANTERN', 'GRAVEL', 'SALT', 'TUNNEL',
@@ -189,13 +189,13 @@ const NOISE_WORDS = [
   'SHUTTER', 'TALLOW', 'UMBER', 'VAPOR', 'WILLOW', 'YARROW', 'ZENITH', 'BRIAR', 'CINDER', 'DUSK',
 ];
 
-/** پوسترِ اتاق ۲: میدانی از کلمه‌های به‌هم‌ریخته که فقط LIAR در آن قرمز است. */
+/** پوستر اتاق ۲: میدانی از کلمه‌های به‌هم‌ریخته که فقط LIAR در آن قرمز است. */
 export function liarCanvas() {
   const W = 420, H = 580;
   const [c, g] = canvas(W, H);
   g.fillStyle = '#10141a';
   g.fillRect(0, 0, W, H);
-  // بافتِ کاغذِ کهنه
+  // بافت کاغذ کهنه
   let r = 7;
   const rand = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
   g.fillStyle = 'rgba(255,255,255,0.02)';
@@ -205,7 +205,7 @@ export function liarCanvas() {
   g.direction = 'ltr';
   const rows = 17;
   const lineH = (H - 40) / rows;
-  // یک جای تصادفیِ ثابت برای LIAR، نه وسطِ قاب
+  // یک جای تصادفی ثابت برای LIAR، نه وسط قاب
   const liarRow = 9;
   for (let row = 0; row < rows; row++) {
     let x = 16 + rand() * 14;
@@ -219,7 +219,7 @@ export function liarCanvas() {
       x += g.measureText(word).width + 10 + rand() * 16;
     }
     if (row === liarRow) {
-      // کلمهٔ قرمز روی همان سطر، کمی درشت‌تر از بقیه
+      // کلمه قرمز روی همان سطر، کمی درشت‌تر از بقیه
       g.font = `700 30px ${UI_FONT}`;
       const lx = W * 0.3;
       g.fillStyle = '#10141a';
@@ -234,7 +234,7 @@ export function liarCanvas() {
   return c;
 }
 
-/** کاغذِ مچالهٔ معمای متناقضِ اتاق ۳. */
+/** کاغذ مچاله معمای متناقض اتاق ۳. */
 export function noteCanvas(lines: string[]) {
   const W = 512, H = 680;
   const [c, g] = canvas(W, H);
@@ -243,7 +243,7 @@ export function noteCanvas(lines: string[]) {
   g.save();
   g.translate(W / 2, H / 2);
   g.rotate(-0.012);
-  // چین‌وچروکِ مچاله‌شدن
+  // چین‌وچروک مچاله‌شدن
   g.strokeStyle = 'rgba(0,0,0,0.07)';
   g.lineWidth = 2;
   for (const [x1, y1, x2, y2] of [[-180, -260, 40, -60], [60, -300, -40, 120], [-200, 60, 180, 200], [150, -180, 190, 260]] as const) {
@@ -261,19 +261,19 @@ export function noteCanvas(lines: string[]) {
   return c;
 }
 
-/** پوسترهای چرت‌وپرتِ اتاق ۳ — زیاد، رنگی و بی‌ربط. */
+/** پوسترهای چرت‌وپرت اتاق ۳ — زیاد، رنگی و بی‌ربط. */
 const JUNK_POSTERS: { lines: string[]; bg: [string, string]; fg: string }[] = [
   { lines: ['هوش مصنوعی', 'دوستت دارد'], bg: ['#3f6bff', '#6f4bff'], fg: '#ffffff' },
   { lines: ['۰٪ خطا', '۱۰۰٪ تو'], bg: ['#ff3fd2', '#ff7a3f'], fg: '#ffffff' },
   { lines: ['هرگز', 'دروغ نمی‌گوید'], bg: ['#ffe14d', '#ffb020'], fg: '#2a1838' },
   { lines: ['فکر نکن.', 'بپرس.'], bg: ['#00d4b4', '#0094ff'], fg: '#06202a' },
-  { lines: ['حافظهٔ تو', 'پشتیبان دارد'], bg: ['#2a1838', '#ff3fd2'], fg: '#ffffff' },
+  { lines: ['حافظه تو', 'پشتیبان دارد'], bg: ['#2a1838', '#ff3fd2'], fg: '#ffffff' },
   { lines: ['تنهایی', 'یک باگ است'], bg: ['#ff2d55', '#7a1fff'], fg: '#ffffff' },
   { lines: ['۳ از ۴ نفر', 'موافق‌اند'], bg: ['#c8ff3f', '#3fffa8'], fg: '#1a2a06' },
   { lines: ['فردا', 'لغو شد'], bg: ['#18122b', '#4a2d63'], fg: '#ffe14d' },
   { lines: ['بخند!', 'ضبط می‌شود'], bg: ['#ff9f1c', '#ff3fd2'], fg: '#2a1838' },
   { lines: ['اعتماد', 'به‌روزرسانی شد'], bg: ['#00a3ff', '#9b5cff'], fg: '#ffffff' },
-  { lines: ['سؤالِ بعدی', 'رایگان است'], bg: ['#ff5a5f', '#ffd400'], fg: '#2a1838' },
+  { lines: ['سؤال بعدی', 'رایگان است'], bg: ['#ff5a5f', '#ffd400'], fg: '#2a1838' },
   { lines: ['ما گوش می‌دهیم', 'همیشه'], bg: ['#7a2c8f', '#ff3fd2'], fg: '#ffffff' },
 ];
 
@@ -289,7 +289,7 @@ export function junkPosterCanvas(i: number) {
   g.fillRect(0, 0, 384, 512);
   let r = (i + 3) * 97;
   const rand = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
-  // اشکالِ تزئینیِ پشتِ متن
+  // اشکال تزئینی پشت متن
   g.globalAlpha = 0.14;
   g.fillStyle = spec.fg;
   for (let k = 0; k < 5; k++) {
@@ -310,7 +310,7 @@ export function junkPosterCanvas(i: number) {
   return c;
 }
 
-/** نمودارِ تزئینیِ اتاقِ اکو. */
+/** نمودار تزئینی اتاق اکو. */
 export function chartCanvas() {
   const [c, g] = canvas(512, 384);
   g.fillStyle = '#ffffff';
@@ -319,7 +319,7 @@ export function chartCanvas() {
   g.textAlign = 'center';
   g.direction = 'rtl';
   g.font = fontOf(true, 40);
-  g.fillText('اعتمادِ انسان به ماشین', 256, 52);
+  g.fillText('اعتماد انسان به ماشین', 256, 52);
   g.strokeStyle = '#94a3b8';
   g.lineWidth = 3;
   g.beginPath();
@@ -338,9 +338,9 @@ export function chartCanvas() {
   return c;
 }
 
-// ───────── اتاق ۴: شبکهٔ عصبی، هزارتو، و پوسترِ واحدِ P41 ─────────
+// ───────── اتاق ۴: شبکه عصبی، هزارتو، و پوستر واحد P41 ─────────
 
-/** بازسازیِ fig-nn.jpg: ۴ ورودی → ۶ → ۶ → ۴ خروجی، با همان مقادیرِ تصویرِ تیم. */
+/** بازسازی fig-nn.jpg: ۴ ورودی → ۶ → ۶ → ۴ خروجی، با همان مقادیر تصویر تیم. */
 export function nnCanvas(input: number[], output: number[], w = 768, h = 512) {
   const [c, g] = canvas(w, h);
   g.fillStyle = '#121212';
@@ -376,7 +376,7 @@ export function nnCanvas(input: number[], output: number[], w = 768, h = 512) {
       g.fill();
     });
   }
-  // برچسبِ عددی کنارِ گره‌های ورودی و خروجی (همان چیزی که در تصویرِ تیم هست)
+  // برچسب عددی کنار گره‌های ورودی و خروجی (همان چیزی که در تصویر تیم هست)
   g.font = `600 19px ${UI_FONT}`;
   g.fillStyle = '#e6e9ef';
   input.forEach((v, i) => {
@@ -395,7 +395,7 @@ export function nnCanvas(input: number[], output: number[], w = 768, h = 512) {
   return c;
 }
 
-/** بازسازیِ fig-maze.jpeg: هزارتوی دایره‌ای با چهار ضربدر؛ ضربدرِ پایین محصور است. */
+/** بازسازی fig-maze.jpeg: هزارتوی دایره‌ای با چهار ضربدر؛ ضربدر پایین محصور است. */
 export function mazeCanvas(size = 512) {
   const [c, g] = canvas(size, size);
   const k = size / 512;
@@ -426,7 +426,7 @@ export function mazeCanvas(size = 512) {
   g.beginPath();
   g.arc(cx, cy, 36 * k, 0.5, 5.8);
   g.stroke();
-  // ضربدرِ پایین داخلِ یک جیبِ بسته است
+  // ضربدر پایین داخل یک جیب بسته است
   g.beginPath();
   g.arc(cx, cy, 210 * k, 1.17, 1.97);
   g.stroke();
@@ -445,16 +445,16 @@ export function mazeCanvas(size = 512) {
 }
 
 export const P41_SECTIONS: { title: string; text?: string[]; items: [string, string, string, string] }[] = [
-  // ترتیبِ items: بالا، راست، پایین، چپ — یعنی راس‌های لوزی
+  // ترتیب items: بالا، راست، پایین، چپ — یعنی راس‌های لوزی
   { title: '۱', items: ['NH₃', 'KCl', 'CuSO₂', 'H₂O'] },
   { title: '۲', items: ['Maxwell', 'Faraday', 'Turing', 'Kirchhoff'] },
   { title: '۳', items: ['', '', '', ''] },
-  // بخشِ ۴ همان ساختارِ اولِ خودش است: یک پرسشِ متنی، بدونِ لوزی و بدونِ فلش
-  { title: '۴', text: ['جنوبِ صفحه رو به بالاست.', '«راست» کدام جهت است؟'], items: ['', '', '', ''] },
+  // بخش ۴ همان ساختار اول خودش است: یک پرسش متنی، بدون لوزی و بدون فلش
+  { title: '۴', text: ['جنوب صفحه رو به بالاست.', '«راست» کدام جهت است؟'], items: ['', '', '', ''] },
 ];
 
 /**
- * پوسترِ واحدِ اتاق ۴: یک قاب، چهار بخش. در هر بخش چهار گزینه روی راس‌های یک لوزی
+ * پوستر واحد اتاق ۴: یک قاب، چهار بخش. در هر بخش چهار گزینه روی راس‌های یک لوزی
  * نشسته‌اند (بالا/راست/پایین/چپ) و هیچ فلشی کشیده نمی‌شود — موقعیت، خودش جهت است.
  */
 export function p41PosterCanvas() {
@@ -486,7 +486,7 @@ export function p41PosterCanvas() {
       sec.text.forEach((l, k) => g.fillText(l, ox + W / 4, cy - 10 + k * 56));
       return;
     }
-    if (i === 2) return; // بخشِ هزارتو جداگانه کشیده می‌شود
+    if (i === 2) return; // بخش هزارتو جداگانه کشیده می‌شود
     const rx = W / 4 - 70, ry = H / 4 - 92;
     const slots: [number, number][] = [[cx, cy - ry], [cx + rx, cy], [cx, cy + ry], [cx - rx, cy]];
     g.fillStyle = '#1e3a5f';
@@ -501,11 +501,11 @@ export function p41PosterCanvas() {
   return c;
 }
 
-/** بخشِ ۳ پوستر: هزارتو در محلِ خودش کشیده می‌شود (یا تصویرِ واقعیِ تیم رویش می‌نشیند). */
+/** بخش ۳ پوستر: هزارتو در محل خودش کشیده می‌شود (یا تصویر واقعی تیم رویش می‌نشیند). */
 export function p41PosterTexture() {
   const c = p41PosterCanvas();
   const t = tex(c);
-  const box = { x: 26, y: 584, w: 460, h: 414 }; // بخشِ ۳ = ربعِ پایین-چپِ کانواس، زیرِ شمارهٔ بخش
+  const box = { x: 26, y: 584, w: 460, h: 414 }; // بخش ۳ = ربع پایین-چپ کانواس، زیر شماره بخش
   const g = c.getContext('2d')!;
   const draw = (src: CanvasImageSource, iw: number, ih: number) => {
     const sc = Math.min(box.w / iw, box.h / ih);
@@ -524,7 +524,7 @@ export function p41PosterTexture() {
   return t;
 }
 
-/** سایه‌ی نرمِ زیرِ اشیا (به‌جای shadow-map، تقریباً بی‌هزینه). */
+/** سایه‌ی نرم زیر اشیا (به‌جای shadow-map، تقریبا بی‌هزینه). */
 let blob: THREE.Texture | null = null;
 export function blobShadowTexture() {
   if (blob) return blob;

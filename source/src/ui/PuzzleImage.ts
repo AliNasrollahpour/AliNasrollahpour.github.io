@@ -1,9 +1,9 @@
-// تصویرِ معما از public/assets/puzzles؛ اگر فایلِ تیم نبود یا placeholder بود، نسخهٔ SVGِ بازسازی‌شده نشان داده می‌شود.
+// تصویر معما از public/assets/puzzles؛ اگر فایل تیم نبود یا placeholder بود، نسخه SVG بازسازی‌شده نشان داده می‌شود.
 import { h } from './dom';
 import { puzzleById } from '../data/game-data';
 import { nnCanvas, mazeCanvas, peopleFallbackCanvas, PLACEHOLDER_MAX } from '../engine/textures';
 
-/** بازسازی‌هایی که روی کانواس کشیده می‌شوند (همان‌هایی که در صحنهٔ سه‌بعدی هم استفاده می‌شوند). */
+/** بازسازی‌هایی که روی کانواس کشیده می‌شوند (همان‌هایی که در صحنه سه‌بعدی هم استفاده می‌شوند). */
 const canvasArt = (make: () => HTMLCanvasElement) => () => {
   const c = make();
   return `<img src="${c.toDataURL()}" alt="" style="width:100%;display:block">`;
@@ -69,8 +69,8 @@ const FALLBACK: Record<string, () => string> = {
   'fig-people-1.jpg': canvasArt(() => peopleFallbackCanvas(2, 85, 16 / 9)),
   'fig-people-2.jpg': canvasArt(() => peopleFallbackCanvas(6, 233, 1.5)),
   'fig-people-3.jpg': canvasArt(() => peopleFallbackCanvas(14, 529, 1.5)),
-  'fig-chess.jpg': () => textSvg(['fig-chess.jpg — تصویرِ تیم', 'نوبتِ سیاه؛ سیاه در یک حرکت مات می‌کند.', 'چیدمانِ همین وضعیت روی میزِ وسطِ اتاق ۴ بازسازی شده است.']),
-  'fig-switches.jpeg': () => textSvg(['fig-switches.jpeg', 'هفت کلیدِ ۰/۱']),
+  'fig-chess.jpg': () => textSvg(['fig-chess.jpg — تصویر تیم', 'نوبت سیاه؛ سیاه در یک حرکت مات می‌کند.', 'چیدمان همین وضعیت روی میز وسط اتاق ۴ بازسازی شده است.']),
+  'fig-switches.jpeg': () => textSvg(['fig-switches.jpeg', 'هفت کلید ۰/۱']),
   'fig-map.jpg': () => textSvg(['fig-map.jpg']),
 };
 
@@ -79,7 +79,7 @@ export function puzzleImage(asset: string, caption?: string): HTMLElement {
   const showFallback = () => {
     fig.innerHTML = '';
     const art = FALLBACK[asset]?.() ?? textSvg([asset]);
-    fig.append(h('div', { class: 'fallback', html: art }), h('figcaption', {}, `${caption ?? ''} · بازسازیِ موقت تا وقتی ${asset} در ریپو قرار بگیرد`));
+    fig.append(h('div', { class: 'fallback', html: art }), h('figcaption', {}, `${caption ?? ''} · بازسازی موقت تا وقتی ${asset} در ریپو قرار بگیرد`));
   };
   const img = h('img', { src: BASE + asset, alt: caption ?? asset, loading: 'lazy' });
   img.addEventListener('load', () => {

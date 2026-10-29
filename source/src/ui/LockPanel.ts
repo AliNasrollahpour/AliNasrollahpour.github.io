@@ -1,4 +1,4 @@
-// یک کامپوننتِ ورودی برای هر نوع قفل (BUILD_SPEC بخش ۸). جواب‌ها فقط از gameData می‌آیند.
+// یک کامپوننت ورودی برای هر نوع قفل (BUILD_SPEC بخش ۸). جواب‌ها فقط از gameData می‌آیند.
 import { h, openPanel, closePanel } from './dom';
 import { puzzleImage } from './PuzzleImage';
 import { t } from '../data/i18n';
@@ -14,8 +14,8 @@ export interface LockCtx {
 }
 
 const LOCK_LABEL: Record<Puzzle['lockType'], string> = {
-  combo: 'رمز', directional: 'قفل جهتی', 'keypad-labeled': 'پد عددی', dial: 'قفل چرخشیِ گاوصندوقی',
-  'pattern-nn': 'قفل الگوییِ ۸ پین', 'binary-switches': 'قفل چرخشیِ باینری', 'name-buttons': 'دکمه‌های اسم', maglock: 'مگ‌لاک', clue: 'سرنخ',
+  combo: 'رمز', directional: 'قفل جهتی', 'keypad-labeled': 'پد عددی', dial: 'قفل چرخشی گاوصندوقی',
+  'pattern-nn': 'قفل الگویی ۸ پین', 'binary-switches': 'قفل چرخشی باینری', 'name-buttons': 'دکمه‌های اسم', maglock: 'مگ‌لاک', clue: 'سرنخ',
 };
 export const lockLabel = (p: Puzzle) => LOCK_LABEL[p.lockType];
 
@@ -57,7 +57,7 @@ export function openLock(p: Puzzle, ctx: LockCtx) {
 
   if (p.prompt) wrap.append(h('p', { class: 'lock-prompt', dir: 'auto' }, p.prompt));
   if (p.clue) wrap.append(h('div', { class: 'lock-clue' }, p.clue));
-  // کاغذِ زیرِ میز (سرنخِ قفلِ چرخشی) جای دیگری از اتاق است؛ روی خودِ قفل نشانش نده.
+  // کاغذ زیر میز (سرنخ قفل چرخشی) جای دیگری از اتاق است؛ روی خود قفل نشانش نده.
   if (p.asset && p.lockType !== 'binary-switches' && p.lockType !== 'dial') wrap.append(puzzleImage(p.asset, p.title));
 
   wrap.append(control(p, ctx, attempt), msg);
@@ -106,7 +106,7 @@ function control(p: Puzzle, ctx: LockCtx, attempt: (input: string | Dir[]) => bo
         render();
         if (seq.length === n) {
           const ok = attempt([...seq]);
-          if (!ok) setTimeout(() => { seq.length = 0; render(); }, 650); // ریستِ خودکار بعد از خطا
+          if (!ok) setTimeout(() => { seq.length = 0; render(); }, 650); // ریست خودکار بعد از خطا
         }
       };
       render();
@@ -128,7 +128,7 @@ function control(p: Puzzle, ctx: LockCtx, attempt: (input: string | Dir[]) => bo
         h('span', { class: 'big' }, k), h('small', {}, labels[k]));
       const enter = h('button', { class: 'btn key enter', onclick: () => { if (!attempt(val)) { val = ''; upd(); } } }, h('span', { class: 'big' }, '⏎'), h('small', {}, 'Enter'));
       const grid = h('div', { class: 'keypad', dir: 'ltr' }, ...['7', '8', '9', '4', '5', '6', '1', '2', '3'].map(key), key('0'), key('.'), enter);
-      const clueTip = h('p', { class: 'muted' }, 'برچسب‌های کم‌رنگ زیرِ ارقام، نامِ کلیدهای پدِ عددی‌اند.');
+      const clueTip = h('p', { class: 'muted' }, 'برچسب‌های کم‌رنگ زیر ارقام، نام کلیدهای پد عددی‌اند.');
       return h('div', {}, screen, grid, clueTip);
     }
 
@@ -158,7 +158,7 @@ function control(p: Puzzle, ctx: LockCtx, attempt: (input: string | Dir[]) => bo
       render();
       return h('div', { class: 'pins-wrap' },
         h('div', { class: 'pins-legend', dir: 'ltr' }, h('span', {}, 'input'), h('span', {}, 'output')), grid,
-        h('p', { class: 'muted' }, 'پینِ روشن = فرورفته (X).'),
+        h('p', { class: 'muted' }, 'پین روشن = فرورفته (X).'),
         h('button', { class: 'btn', onclick: () => attempt(pins.map((x) => (x ? 'X' : 'O')).join('')) }, t('submit')));
     }
 
@@ -187,7 +187,7 @@ function control(p: Puzzle, ctx: LockCtx, attempt: (input: string | Dir[]) => bo
             (e.currentTarget as HTMLElement).classList.add(ok ? 'ok' : 'bad');
           },
         }, name)),
-        h('p', { class: 'muted' }, used ? 'این ایستگاه قبلاً یک حدس گرفته و قفل شده است.' : 'فقط یک بار.'));
+        h('p', { class: 'muted' }, used ? 'این ایستگاه قبلا یک حدس گرفته و قفل شده است.' : 'فقط یک بار.'));
     }
 
     case 'clue':

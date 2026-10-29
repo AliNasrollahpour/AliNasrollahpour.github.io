@@ -1,4 +1,4 @@
-// صفحهٔ ورود: پیامِ مأموریت، پیکربندیِ چت، زبان، و دو ورودی (تورِ داور / بازی).
+// صفحه ورود: عنوان، پیکربندی چت ایجنت‌ها، دکمه شروع، و پیام مأموریت به‌عنوان راهنما.
 import { h } from './dom';
 import { settingsForm } from './SettingsForm';
 import { t } from '../data/i18n';
@@ -10,21 +10,19 @@ export function showIntro(onStart: (mode: Mode) => void) {
   root.innerHTML = '';
   root.hidden = false;
   const paras = gameData.briefing.split('\n\n').map((p) => h('p', {}, p));
+  // ترتیب در DOM = ترتیب روی موبایل: عنوان → پیکربندی → شروع → راهنما.
+  // روی دسکتاپ، CSS با grid همین‌ها را دو ستونه می‌چیند.
   root.append(
     h('div', { class: 'intro-card' },
-      h('div', { class: 'intro-top' },
-        h('div', {},
-          h('div', { class: 'kicker' }, t('appSubtitle')),
-          h('h1', {}, t('appTitle')))),
-      h('div', { class: 'intro-grid' },
-        h('article', { class: 'briefing', dir: 'rtl', lang: 'fa' },
-          h('h3', {}, t('briefingTitle')),
-          ...paras),
-        h('aside', {},
-          h('h3', {}, t('chatConfig')),
-          settingsForm())),
+      h('h1', { class: 'intro-title' }, t('appTitle')),
+      h('section', { class: 'intro-config' },
+        h('h3', {}, t('chatConfig')),
+        settingsForm()),
       h('div', { class: 'intro-actions' },
-        h('button', { class: 'btn big', onclick: () => onStart('play') }, h('b', {}, t('start')), h('small', {}, t('startHint'))))),
+        h('button', { class: 'btn big', onclick: () => onStart('play') }, h('b', {}, t('start')), h('small', {}, t('startHint')))),
+      h('details', { class: 'briefing', dir: 'rtl', lang: 'fa', open: true },
+        h('summary', {}, t('briefingTitle')),
+        ...paras)),
   );
   root.dir = 'rtl';
 }

@@ -1,14 +1,14 @@
-// سیستم‌پرامپت‌ها مستقیماً از AGENTS.md خوانده می‌شوند تا یک منبع بماند.
-// اگر تیم نسخهٔ اصلیِ AGENTS.md را جایگزین کند، کافی است همین فایلِ md عوض شود.
+// سیستم‌پرامپت‌ها مستقیما از AGENTS.md خوانده می‌شوند تا یک منبع بماند.
+// اگر تیم نسخه اصلی AGENTS.md را جایگزین کند، کافی است همین فایل md عوض شود.
 import agentsMd from './AGENTS.md?raw';
 import type { AgentName } from './game-data';
 
 export interface AgentPersona {
   name: AgentName;
   heading: string;
-  /** متنِ توضیحیِ شخصیت (خلاصه، ضعف، ترس…) برای پنلِ حالت راهنما. */
+  /** متن توضیحی شخصیت (خلاصه، ضعف، ترس…) برای پنل حالت راهنما. */
   profile: string;
-  /** بلوکِ «SYSTEM PROMPT» عیناً. */
+  /** بلوک «SYSTEM PROMPT» عینا. */
   systemPrompt: string;
 }
 
@@ -49,7 +49,7 @@ export function parseAgentsMd(md: string): ParsedAgents {
       ? body
           .slice(promptStart)
           .split('\n')
-          .slice(1) // سطرِ عنوانِ «### SYSTEM PROMPT — X»
+          .slice(1) // سطر عنوان «### SYSTEM PROMPT — X»
           .map((l) => l.replace(/^>\s?/, ''))
           .join('\n')
           .trim()

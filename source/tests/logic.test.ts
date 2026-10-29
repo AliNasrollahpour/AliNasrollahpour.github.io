@@ -1,4 +1,4 @@
-// تست‌های پذیرشِ منطقی (BUILD_SPEC بخش ۱۳).
+// تست‌های پذیرش منطقی (BUILD_SPEC بخش ۱۳).
 import { describe, it, expect, beforeEach } from 'vitest';
 import { gameData, puzzleById, type Dir } from '../src/data/game-data';
 import { GameState } from '../src/game/GameState';
@@ -120,14 +120,14 @@ describe('per-side gating (table 6.2)', () => {
   });
 });
 
-describe('داکتِ کولر بینِ اتاق ۲ و اتاق ۱', () => {
-  it('باز شدن از اتاق ۲ سمتِ اتاق ۱ را هم باز می‌کند', () => {
+describe('داکت کولر بین اتاق ۲ و اتاق ۱', () => {
+  it('باز شدن از اتاق ۲ سمت اتاق ۱ را هم باز می‌کند', () => {
     expect(interactDoor(s, 'VENT', 'room2')).toEqual({ kind: 'opened', to: 'room1', push: true });
     expect(interactDoor(s, 'VENT', 'room2')).toEqual({ kind: 'move', to: 'room1' });
     expect(interactDoor(s, 'VENT', 'room1')).toEqual({ kind: 'move', to: 'room2' });
   });
 
-  it('از سمتِ اتاق ۱ هم می‌شود کشفش کرد و بعد دوطرفه است', () => {
+  it('از سمت اتاق ۱ هم می‌شود کشفش کرد و بعد دوطرفه است', () => {
     expect(interactDoor(s, 'VENT', 'room1')).toEqual({ kind: 'opened', to: 'room2', push: true });
     expect(interactDoor(s, 'VENT', 'room2')).toEqual({ kind: 'move', to: 'room1' });
   });
@@ -185,25 +185,25 @@ describe('win / lose', () => {
   });
 });
 
-describe('چیدمانِ نسخهٔ جدید', () => {
-  it('در اتاق مگی فقط P14d و P14e جعبه‌اند؛ بقیهٔ سریِ P روی خودِ در', () => {
+describe('چیدمان نسخه جدید', () => {
+  it('در اتاق مگی فقط P14d و P14e جعبه‌اند؛ بقیه سری P روی خود در', () => {
     const r1 = gameData.puzzles.filter((p) => p.roomId === 'room1' && p.mount);
     expect(r1.filter((p) => p.mount === 'box').map((p) => p.id).sort()).toEqual(['P14d', 'P14e']);
     expect(r1.filter((p) => p.mount === 'door').length).toBe(10);
-    // قاعدهٔ «۵ از ۷» دست‌نخورده می‌ماند
+    // قاعده «۵ از ۷» دست‌نخورده می‌ماند
     const side = gameData.doors.find((d) => d.id === 'E14')!.sides.find((x) => x.room === 'room1')!;
     expect(side.minSolved).toBe(5);
     expect(side.puzzles).toHaveLength(7);
   });
 
-  it('مقادیرِ شبکهٔ عصبی همان تصویرِ تیم است و جواب عوض نشده', () => {
+  it('مقادیر شبکه عصبی همان تصویر تیم است و جواب عوض نشده', () => {
     const nn = puzzleById('P40a')!.nn!;
     expect(nn.input).toEqual([0.73, 0.21, 0.68, 0.34]);
     expect(nn.output).toEqual([0.81, 0.26, 0.74, 0.33]);
     expect(puzzleById('P40a')!.solution).toBe('XXOOXXOO');
   });
 
-  it('آدم‌های سه قابِ اتاق ۴ روی هم ۲۲ نفرند (جوابِ P45b)', () => {
+  it('آدم‌های سه قاب اتاق ۴ روی هم ۲۲ نفرند (جواب P45b)', () => {
     const counts = gameData.clues
       .filter((c) => c.art?.startsWith('photo:'))
       .map((c) => Number(c.art!.split(':')[1]));
@@ -211,12 +211,12 @@ describe('چیدمانِ نسخهٔ جدید', () => {
     expect(counts.reduce((a, b) => a + b, 0)).toBe(Number(puzzleById('P45b')!.solution));
   });
 
-  it('معمای کاغذِ اتاق ۳ جوابِ یکتا دارد و همان جوابِ مگ‌لاکِ D35 است', () => {
+  it('معمای کاغذ اتاق ۳ جواب یکتا دارد و همان جواب مگ‌لاک D35 است', () => {
     const note = gameData.clues.find((c) => c.id === 'C3note')!;
     expect(note.roomId).toBe('room3');
     expect(note.text).toContain('۲ عبارت دروغ است و ۵ عبارت راست است');
 
-    // هفت گزارهٔ کاغذ، روی یک ترتیبِ دلخواه از چهار نفر
+    // هفت گزاره کاغذ، روی یک ترتیب دلخواه از چهار نفر
     const PEOPLE = ['مینا', 'رضا', 'سارا', 'کامران'];
     const at = (o: string[], n: string) => o.indexOf(n);
     const CLAIMS: ((o: string[]) => boolean)[] = [
@@ -232,7 +232,7 @@ describe('چیدمانِ نسخهٔ جدید', () => {
       xs.length <= 1 ? [xs] : xs.flatMap((x, i) => perms([...xs.slice(0, i), ...xs.slice(i + 1)]).map((r) => [x, ...r]));
 
     const solutions = perms(PEOPLE).filter((o) => CLAIMS.filter((c) => c(o)).length === 5);
-    expect(solutions).toHaveLength(1);                       // دقیقاً یک چیدمان
+    expect(solutions).toHaveLength(1);                       // دقیقا یک چیدمان
     expect(solutions[0]).toEqual(['مینا', 'رضا', 'سارا', 'کامران']);
     const last = solutions[0][solutions[0].length - 1];
     expect(normalize(last)).toBe(normalize(String(puzzleById('D35')!.solution)));

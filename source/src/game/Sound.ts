@@ -1,4 +1,4 @@
-// صداهای کوتاهِ سنتزی با WebAudio — بدون فایلِ صوتی.
+// صداهای کوتاه سنتزی با WebAudio — بدون فایل صوتی.
 let ctx: AudioContext | null = null;
 
 function ac() {

@@ -1,11 +1,11 @@
-// تماسِ مستقیم از مرورگر به endpointِ سازگار با OpenAI (POST {BASE_URL}/chat/completions).
+// تماس مستقیم از مرورگر به endpoint سازگار با OpenAI (POST {BASE_URL}/chat/completions).
 import { agentsDoc } from '../data/agents';
 import { agentByRoom, type RoomId } from '../data/game-data';
 import type { ChatMsg, GameState } from './GameState';
 import type { ChatSettings } from './Settings';
 import { devanAttemptsLeft } from './PuzzleController';
 
-/** حدِ زمینه: فقط N پیامِ اخیر فرستاده می‌شود. */
+/** حد زمینه: فقط N پیام اخیر فرستاده می‌شود. */
 export const HISTORY_LIMIT = 16;
 
 const BORED_DEVAN = ['هوم.', 'اوهوم.', '…', 'باشه.', 'خسته‌م.', 'نه.', 'شاید.', 'بی‌خیال.'];
@@ -16,22 +16,22 @@ export function buildSystemPrompt(room: RoomId, state: GameState): string {
   const persona = agentsDoc.personas[agent.name];
   const live: string[] = [];
   if (agent.name === 'Devan') {
-    live.push(`تلاش‌های باقی‌ماندهٔ بازیکن برای مگ‌لاک: ${devanAttemptsLeft(state)}.`);
-    if (state.solved.has('D35')) live.push('بازیکن مگ‌لاک را باز کرده است؛ دیگر لازم نیست چیزی پنهان کنی دربارهٔ اسم، ولی همچنان در نقش بمان.');
+    live.push(`تلاش‌های باقی‌مانده بازیکن برای مگ‌لاک: ${devanAttemptsLeft(state)}.`);
+    if (state.solved.has('D35')) live.push('بازیکن مگ‌لاک را باز کرده است؛ دیگر لازم نیست چیزی پنهان کنی درباره اسم، ولی همچنان در نقش بمان.');
   }
   if (state.solved.size) live.push(`معماهایی که تیم تا الان حل کرده (شناسه‌ها برای تو، هرگز به زبان نیاور): ${[...state.solved].join(', ')}.`);
-  if (state.protocolPressed) live.push('پروتکل ایمنیِ هسته فعال شده است. هسته در امان است.');
+  if (state.protocolPressed) live.push('پروتکل ایمنی هسته فعال شده است. هسته در امان است.');
 
   return [
     '# جهان',
     agentsDoc.context,
-    '# قوانینِ مشترک',
+    '# قوانین مشترک',
     agentsDoc.sharedRules,
-    `# شخصیتِ تو`,
+    `# شخصیت تو`,
     persona.systemPrompt,
     '# آنچه تو از اتاقت می‌دانی (فقط برای خودت)',
     agent.knowledge,
-    live.length ? `# وضعیتِ فعلی\n${live.join('\n')}` : '',
+    live.length ? `# وضعیت فعلی\n${live.join('\n')}` : '',
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -45,7 +45,7 @@ export function buildMessages(room: RoomId, state: GameState, history: ChatMsg[]
   ];
 }
 
-/** Devan پس از اتمامِ سقفِ تلاش، بدون تماسِ شبکه پاسخِ بی‌روح می‌دهد (قاعده در منطق، نه فقط پرامپت). */
+/** Devan پس از اتمام سقف تلاش، بدون تماس شبکه پاسخ بی‌روح می‌دهد (قاعده در منطق، نه فقط پرامپت). */
 export function devanIsBored(room: RoomId, state: GameState) {
   return room === 'room3' && !state.solved.has('D35') && devanAttemptsLeft(state) <= 0;
 }

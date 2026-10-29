@@ -1,4 +1,4 @@
-// صحنه، رندرر، لوپ؛ نشان‌های ⓘ حالت راهنما، محو کردنِ دیوارهای جلوی دوربین، و فوکوس روی اشیا.
+// صحنه، رندرر، لوپ؛ نشان‌های ⓘ حالت راهنما، محو کردن دیوارهای جلوی دوربین، و فوکوس روی اشیا.
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
@@ -26,13 +26,13 @@ export class Stage {
   private clock = new THREE.Clock();
   private badges: { it: Interactable; obj: CSS2DObject }[] = [];
   private onFrame: ((dt: number) => void)[] = [];
-  /** دوربین روی یک شیء فوکوس کرده است (نه نمای کلیِ اتاق). */
+  /** دوربین روی یک شیء فوکوس کرده است (نه نمای کلی اتاق). */
   private focused = false;
   private focusToken = 0;
 
   constructor(private host: HTMLElement, private state: GameState, handlers: PickHandlers & { onBadge: (it: Interactable) => void }) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    // روی گوشی تراکمِ پیکسل کمتر تا جزئیاتِ بیشتر روی پرفورمنس اثر نگذارد
+    // روی گوشی تراکم پیکسل کمتر تا جزئیات بیشتر روی پرفورمنس اثر نگذارد
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 760 ? 1.5 : 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -44,7 +44,7 @@ export class Stage {
 
     this.scene.background = new THREE.Color('#0b0d12');
     this.scene.fog = new THREE.Fog('#0b0d12', 26, 60);
-    // نقشهٔ محیطیِ یک‌باره: فلزها و لبه‌های گرد بازتابِ نرم می‌گیرند، بدونِ هزینهٔ هر فریم.
+    // نقشه محیطی یک‌باره: فلزها و لبه‌های گرد بازتاب نرم می‌گیرند، بدون هزینه هر فریم.
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     this.scene.environmentIntensity = 0.32;
@@ -71,7 +71,7 @@ export class Stage {
       const key = `${it.room}|${it.id}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      // transformِ دکمه مالِ CSS2DRenderer است؛ افکتِ hover روی span داخلی اعمال می‌شود.
+      // transform دکمه مال CSS2DRenderer است؛ افکت hover روی span داخلی اعمال می‌شود.
       const el = document.createElement('button');
       el.className = 'badge';
       el.setAttribute('aria-label', it.label);
@@ -109,10 +109,9 @@ export class Stage {
     }
     for (const [room, lbl] of Object.entries(this.world.labels)) {
       lbl.visible = !v;
-      const ops = this.state.opsIn(room as RoomId);
+      // برچسب اتاق فقط نام اتاق را نشان می‌دهد؛ نه ایموجی، نه شماره (درخواست کاربر)
       const span = lbl.element.querySelector('span');
-      // بدونِ ایموجی (درخواستِ کاربر): فقط شمارهٔ هم‌تیمی‌های داخلِ اتاق
-      if (span) span.textContent = ops.map((o) => o.name).join(' ');
+      if (span) span.textContent = '';
       lbl.element.classList.toggle('active', this.state.room === room);
     }
   }
@@ -135,7 +134,7 @@ export class Stage {
 
   /**
    * دوربین را روی شیء می‌برد. اگر پنلی باز شود، با بسته‌شدنش به نمای اتاق برمی‌گردد؛
-   * اگر نه (برداشتنِ کلید، سکه…) بعد از `holdMs` برمی‌گردد.
+   * اگر نه (برداشتن کلید، سکه…) بعد از `holdMs` برمی‌گردد.
    */
   focusOn(it: Interactable, holdMs = 2600) {
     if (!this.state.view) return;
@@ -170,7 +169,7 @@ export class Stage {
     if (this.state.view) this.rig.goRoom(this.state.view, this.world.centers[this.state.view]);
   }
 
-  /** پنلِ کناری: فضای اشغالش را به دوربین بده؛ با بسته‌شدنش از فوکوس برگرد. */
+  /** پنل کناری: فضای اشغالش را به دوربین بده؛ با بسته‌شدنش از فوکوس برگرد. */
   private watchPanel() {
     const root = document.getElementById('panel-root')!;
     let observed: HTMLElement | null = null;
@@ -185,7 +184,7 @@ export class Stage {
       if (!panel) {
         this.rig.setInsets(0, 0, 0);
         if (this.focused) {
-          // کمی صبر تا انیمیشنِ بازشدن (درپوش، گاوصندوق، در) دیده شود، بعد برگرد
+          // کمی صبر تا انیمیشن بازشدن (درپوش، گاوصندوق، در) دیده شود، بعد برگرد
           const token = ++this.focusToken;
           setTimeout(() => {
             if (token === this.focusToken && !root.querySelector('.panel')) this.refocusRoom();
@@ -211,6 +210,12 @@ export class Stage {
     this.rig.resize(w, h);
   }
 
+  /**
+   * دیوارهای روبه‌دوربین محو می‌شوند. نکته مهم: دیوار کاملا مات باید از صف
+   * transparent بیرون بیاید. اتاق‌های همسایه دیوار مشترک دارند و دو سطح هم‌صفحه
+   * در صف transparent مرتب‌سازی ناپایدار می‌گیرند — همان «گلیچ» نقطه‌نقطه
+   * دیوارهای دور اتاق ۵.
+   */
   private fadeWalls() {
     const v = this.state.view;
     const camDir = new THREE.Vector3();
@@ -220,12 +225,24 @@ export class Stage {
       for (const w of list) {
         const facing = v === room && (w.userData.normal as THREE.Vector3).dot(camDir) > 0.3;
         const target = facing ? 0.12 : 1;
-        // روی خودِ دیوار و همهٔ جزئیاتِ چسبیده به آن (دستگیره، قاب‌ها)
+        // روی خود دیوار و همه جزئیات چسبیده به آن (دستگیره، قاب‌ها)
         w.traverse((o) => {
           const m = (o as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
-          if (!m) return;
-          if (Math.abs(m.opacity - target) < 0.005) return;
-          m.transparent = true;
+          if (!m || m.opacity === undefined) return;
+          if (Math.abs(m.opacity - target) < 0.005) {
+            // رسیده به هدف: اگر کاملا مات است، برگرد به صف opaque
+            if (target === 1 && m.transparent) {
+              m.opacity = 1;
+              m.transparent = false;
+              m.depthWrite = true;
+              m.needsUpdate = true;
+            }
+            return;
+          }
+          if (!m.transparent) {
+            m.transparent = true;
+            m.needsUpdate = true;
+          }
           m.opacity += (target - m.opacity) * 0.2;
           m.depthWrite = m.opacity > 0.9;
         });

@@ -16,7 +16,7 @@ export interface ChatMsg {
 
 const START_ROOMS: RoomId[] = ['room1', 'room2', 'room3', 'room4'];
 
-/** وضعیتِ کاملِ یک دور بازی. منطق در DoorLogic و PuzzleController است. */
+/** وضعیت کامل یک دور بازی. منطق در DoorLogic و PuzzleController است. */
 export class GameState {
   mode: Mode = 'play';
   ops: Operative[] = [];
@@ -33,7 +33,7 @@ export class GameState {
   coinsFound = new Set<string>();
   coinsGiven = new Set<string>();
   cards = new Set<string>();
-  /** پازل‌هایی که سقفِ حدسشان تمام شده (D53). */
+  /** پازل‌هایی که سقف حدسشان تمام شده (D53). */
   exhausted = new Set<string>();
   devanFailed = 0;
   hatchOpen = false;
@@ -82,7 +82,7 @@ export class GameState {
     return this.ops.filter((o) => o.room === room);
   }
 
-  /** فعال‌کردنِ یک هم‌تیمی که در این اتاق است (حالت بازی). */
+  /** فعال‌کردن یک هم‌تیمی که در این اتاق است (حالت بازی). */
   selectOpIn(room: RoomId): boolean {
     const idx = this.ops.findIndex((o) => o.room === room);
     if (idx < 0) return false;

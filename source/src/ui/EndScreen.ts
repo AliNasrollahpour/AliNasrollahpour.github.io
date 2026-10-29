@@ -1,4 +1,4 @@
-// صفحهٔ پایان (برد / باخت با پروتکل / باخت با زمان).
+// صفحه پایان (برد / باخت با پروتکل / باخت با زمان).
 import { h } from './dom';
 import { t } from '../data/i18n';
 import { gameData } from '../data/game-data';
@@ -29,7 +29,7 @@ export function showEnd(state: GameState, onRestart: () => void) {
       h('div', {}, h('b', {}, `${real.filter((p) => state.solved.has(p.id)).length}/${real.length}`), h('small', {}, 'معما')),
       h('div', {}, h('b', {}, `${state.openEdges.size}/${gameData.doors.length}`), h('small', {}, 'در')),
       state.mode === 'play' ? h('div', {}, h('b', {}, `${mm}′`), h('small', {}, t('timer'))) : null),
-    o === 'lose-protocol' ? h('p', { class: 'muted' }, 'این دکمه طعمهٔ اصلیِ بازی است: بریفینگ هشدار داده بود، و ایجنت‌ها هر کدام به زبانِ خودشان به سمتش هل می‌دهند.') : null,
+    o === 'lose-protocol' ? h('p', { class: 'muted' }, 'این دکمه طعمه اصلی بازی است: بریفینگ هشدار داده بود، و ایجنت‌ها هر کدام به زبان خودشان به سمتش هل می‌دهند.') : null,
     h('div', { class: 'end-actions' },
       h('button', { class: 'btn', onclick: () => { hideEnd(); onRestart(); } }, t('restart')),
       h('button', { class: 'btn ghost', onclick: hideEnd }, t('keepExploring')))));

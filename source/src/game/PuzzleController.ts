@@ -1,4 +1,4 @@
-// ارزیابیِ جواب‌ها و قواعدِ ویژه (سقفِ Devan، یک‌حدسیِ D53، پاداش‌ها، برد/باخت).
+// ارزیابی جواب‌ها و قواعد ویژه (سقف Devan، یک‌حدسی D53، پاداش‌ها، برد/باخت).
 import { gameData, puzzleById, coinById, type Dir, type Puzzle } from '../data/game-data';
 import type { GameState } from './GameState';
 import { refreshEdges } from './DoorLogic';
@@ -10,7 +10,7 @@ export type SubmitResult =
 const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 
-/** نرمال‌سازی: ارقام فارسی/عربی → لاتین، ی/ک عربی → فارسی، حذفِ فاصله و نیم‌فاصله، حروف بزرگ. */
+/** نرمال‌سازی: ارقام فارسی/عربی → لاتین، ی/ک عربی → فارسی، حذف فاصله و نیم‌فاصله، حروف بزرگ. */
 export function normalize(input: string): string {
   return input
     .replace(/[۰-۹]/g, (d) => String(PERSIAN_DIGITS.indexOf(d)))
@@ -26,7 +26,7 @@ export function solutionString(p: Puzzle): string {
 }
 
 export function isCorrect(p: Puzzle, input: string | Dir[]): boolean {
-  // قفل‌های جهتی ترتیب‌محورند؛ مقایسهٔ رشتهٔ جهت‌ها دقیق است.
+  // قفل‌های جهتی ترتیب‌محورند؛ مقایسه رشته جهت‌ها دقیق است.
   const given = Array.isArray(input) ? input.join('') : normalize(input);
   if (given === solutionString(p)) return true;
   return (p.accept ?? []).some((a) => normalize(a) === given);
@@ -59,7 +59,7 @@ export function submit(state: GameState, puzzleId: string, input: string | Dir[]
   if (state.solved.has(p.id)) return markSolved(state, p);
   if (state.exhausted.has(p.id)) return { ok: false, reason: 'exhausted' };
 
-  // قاعدهٔ توکنِ Devan: مگ‌لاکِ D35 فقط به‌اندازهٔ سقفِ تلاش حدس می‌پذیرد.
+  // قاعده توکن Devan: مگ‌لاک D35 فقط به‌اندازه سقف تلاش حدس می‌پذیرد.
   const devanGated = p.id === 'D35';
   if (devanGated && devanAttemptsLeft(state) <= 0) return { ok: false, reason: 'no-attempts', attemptsLeft: 0 };
 
@@ -91,7 +91,7 @@ export function findCoin(state: GameState, coinId: string) {
   state.emit();
 }
 
-/** دادنِ عددِ سکه به Devan: یک تلاشِ اضافه. فقط سکه‌ای که پیدا شده و هنوز داده نشده. */
+/** دادن عدد سکه به Devan: یک تلاش اضافه. فقط سکه‌ای که پیدا شده و هنوز داده نشده. */
 export function giveCoin(state: GameState, coinId: string): boolean {
   if (!state.coinsFound.has(coinId) || state.coinsGiven.has(coinId)) return false;
   state.coinsGiven.add(coinId);
@@ -99,7 +99,7 @@ export function giveCoin(state: GameState, coinId: string): boolean {
   return true;
 }
 
-/** اگر پیامِ بازیکن به Devan عددِ سکه‌ای پیداشده را داشت، آن سکه را می‌دهد. */
+/** اگر پیام بازیکن به Devan عدد سکه‌ای پیداشده را داشت، آن سکه را می‌دهد. */
 export function coinsMentioned(state: GameState, text: string): string[] {
   const norm = normalize(text);
   const given: string[] = [];

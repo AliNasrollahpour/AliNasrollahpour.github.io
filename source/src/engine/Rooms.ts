@@ -1,6 +1,6 @@
-﻿// ساختِ هندسهٔ پنج اتاق از روی نقشه (fig-map): چهار اتاقِ مربعی در گوشه‌ها، هشت‌ضلعیِ اصلی در وسط.
-// همهٔ پراپ‌ها از primitive ساخته می‌شوند و هر پراپِ تعاملی با یک «interact id» ثبت می‌شود.
-// جزئیات با هندسه‌های گوشه‌گرد، instancing و سایهٔ نرمِ کانواسی اضافه شده تا صحنه سبک بماند.
+﻿// ساخت هندسه پنج اتاق از روی نقشه (fig-map): چهار اتاق مربعی در گوشه‌ها، هشت‌ضلعی اصلی در وسط.
+// همه پراپ‌ها از primitive ساخته می‌شوند و هر پراپ تعاملی با یک «interact id» ثبت می‌شود.
+// جزئیات با هندسه‌های گوشه‌گرد، instancing و سایه نرم کانواسی اضافه شده تا صحنه سبک بماند.
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
@@ -16,9 +16,9 @@ export interface Interactable {
   room: RoomId;
   object: THREE.Object3D;
   label: string;
-  /** ارتفاعِ نشانِ ⓘ بالای شیء. */
+  /** ارتفاع نشان ⓘ بالای شیء. */
   badgeY: number;
-  /** اگر برگرداند false، شیء فعلاً قابل‌کلیک نیست (مثلاً دکمهٔ پروتکل قبل از باز شدنِ دریچه). */
+  /** اگر برگرداند false، شیء فعلا قابل‌کلیک نیست (مثلا دکمه پروتکل قبل از باز شدن دریچه). */
   enabled?: (s: GameState) => boolean;
 }
 
@@ -29,25 +29,25 @@ export interface World {
   walls: Record<RoomId, THREE.Object3D[]>;
   interactables: Interactable[];
   labels: Record<RoomId, CSS2DObject>;
-  /** نقطه‌ای در جهان برای فوکوسِ دوربین (مثلاً قفلِ مرتفعِ D25). */
+  /** نقطه‌ای در جهان برای فوکوس دوربین (مثلا قفل مرتفع D25). */
   focusPoints: Record<string, THREE.Vector3>;
   sync: (s: GameState) => void;
   update: (dt: number) => void;
 }
 
 /**
- * مقیاسِ جهان: «۶۰ درصدِ» اندازهٔ قبلی (درخواستِ کاربر). همهٔ پراپ‌ها در فضای قدیمی
- * نوشته شده‌اند و داخلِ یک گروهِ scale-شده می‌نشینند، پس چیدمانشان دست‌نخورده می‌ماند.
+ * مقیاس جهان: «۶۰ درصد» اندازه قبلی (درخواست کاربر). همه پراپ‌ها در فضای قدیمی
+ * نوشته شده‌اند و داخل یک گروه scale-شده می‌نشینند، پس چیدمانشان دست‌نخورده می‌ماند.
  */
 export const S = 0.66;
-/** نیم‌عرضِ ربعِ هر اتاقِ گوشه (اتاق = یک ربعِ کاملِ ۲×ROOM_HALF، منهای گازِ هشت‌ضلعی). */
+/** نیم‌عرض ربع هر اتاق گوشه (اتاق = یک ربع کامل ۲×ROOM_HALF، منهای گاز هشت‌ضلعی). */
 export const ROOM_HALF = 5 * S;
 const QUAD = 2 * ROOM_HALF;
 const WALL_H = 2.6 * S;
 const WALL_T = 0.2 * S;
 const DOOR_W = 1.5 * S;
 const DOOR_H = 2.15 * S;
-/** هشت‌ضلعیِ مرکزی مستقیم از ربعِ چهار اتاق بریده می‌شود؛ هیچ راهرویی در کار نیست. */
+/** هشت‌ضلعی مرکزی مستقیم از ربع چهار اتاق بریده می‌شود؛ هیچ راهرویی در کار نیست. */
 const OCT_R = 3.6;
 const GOLD = '#f2c94c';
 
@@ -61,26 +61,26 @@ export const CENTERS: Record<RoomId, [number, number]> = {
 
 const OCT_APOTHEM = OCT_R * Math.cos(Math.PI / 8);
 const OCT_HALFSIDE = OCT_R * Math.sin(Math.PI / 8);
-/** مرکزِ ضلعِ مورّبِ هشت‌ضلعی رو به هر اتاقِ گوشه — همان‌جا که درِ آن اتاق می‌نشیند. */
+/** مرکز ضلع مورب هشت‌ضلعی رو به هر اتاق گوشه — همان‌جا که در آن اتاق می‌نشیند. */
 const diag = (sx: number, sz: number): [number, number] => [(sx * OCT_APOTHEM) / Math.SQRT2, (sz * OCT_APOTHEM) / Math.SQRT2];
-/** وسطِ دیوارِ مشترکِ دو اتاقِ گوشه (از لبهٔ هشت‌ضلعی تا لبهٔ بیرونیِ نقشه). */
+/** وسط دیوار مشترک دو اتاق گوشه (از لبه هشت‌ضلعی تا لبه بیرونی نقشه). */
 const shared = (QUAD + OCT_APOTHEM) / 2;
 
 /**
- * محلِ **یک** درِ مشترک برای هر یال، در مختصاتِ جهانی.
- * هیچ یالی دو درِ رو‌به‌رو ندارد؛ هر در دقیقاً روی دیوارِ مشترکِ دو اتاق است.
+ * محل **یک** در مشترک برای هر یال، در مختصات جهانی.
+ * هیچ یالی دو در رو‌به‌رو ندارد؛ هر در دقیقا روی دیوار مشترک دو اتاق است.
  */
 const DOOR_AT: Record<string, [number, number]> = {
-  E13: [0, -shared],        // اتاق ۱ | اتاق ۳ — دیوارِ x=0 در نیمهٔ جنوبی
-  E14: [-shared, 0],        // اتاق ۱ | اتاق ۴ — دیوارِ z=0 در نیمهٔ غربی
-  E23: [shared, 0],         // اتاق ۲ | اتاق ۳ — دیوارِ z=0 در نیمهٔ شرقی
-  E24: [0, shared],         // اتاق ۲ | اتاق ۴ — دیوارِ x=0 در نیمهٔ شمالی
+  E13: [0, -shared],        // اتاق ۱ | اتاق ۳ — دیوار x=0 در نیمه جنوبی
+  E14: [-shared, 0],        // اتاق ۱ | اتاق ۴ — دیوار z=0 در نیمه غربی
+  E23: [shared, 0],         // اتاق ۲ | اتاق ۳ — دیوار z=0 در نیمه شرقی
+  E24: [0, shared],         // اتاق ۲ | اتاق ۴ — دیوار x=0 در نیمه شمالی
   E25: diag(1, 1),          // اتاق ۲ | هسته
   E35: diag(1, -1),         // اتاق ۳ | هسته
   E45: diag(-1, 1),         // اتاق ۴ | هسته
   E51: diag(-1, -1),        // هسته | اتاق ۱
 };
-/** داکتِ کولر: بالای D25 در اتاق ۲ و بالای D51 در اتاق ۱ — یک مجرا، دو توری. */
+/** داکت کولر: بالای D25 در اتاق ۲ و بالای D51 در اتاق ۱ — یک مجرا، دو توری. */
 const VENT_AT: Record<string, [number, number]> = { room2: diag(1, 1), room1: diag(-1, -1) };
 
 type Anim = { obj: THREE.Object3D; key: 'rx' | 'ry' | 'rz' | 'py' | 'px' | 'sy'; target: number };
@@ -108,7 +108,7 @@ function box(w: number, h: number, d: number, color: string | number, x = 0, y =
   return m;
 }
 
-/** جعبهٔ گوشه‌گرد — لبه‌ها نور می‌گیرند و اشیا کمتر «کارتنی» به نظر می‌رسند. */
+/** جعبه گوشه‌گرد — لبه‌ها نور می‌گیرند و اشیا کمتر «کارتنی» به نظر می‌رسند. */
 function rbox(w: number, h: number, d: number, color: string | number, x = 0, y = 0, z = 0, extra?: Partial<THREE.MeshStandardMaterialParameters>, radius?: number) {
   const r = radius ?? Math.min(0.05, Math.min(w, h, d) * 0.18);
   const m = new THREE.Mesh(cached(`r${w},${h},${d},${r}`, () => new RoundedBoxGeometry(w, h, d, 2, r)), std(color, extra));
@@ -154,7 +154,7 @@ function shadowBlob(w: number, d: number, x: number, z: number, opacity = 0.8) {
   return m;
 }
 
-/** چند جعبهٔ کوچک با یک draw call (کلیدهای کیبورد، کتاب‌ها). */
+/** چند جعبه کوچک با یک draw call (کلیدهای کیبورد، کتاب‌ها). */
 function instancedBoxes(items: { p: [number, number, number]; s: [number, number, number]; c: string; ry?: number }[], extra?: Partial<THREE.MeshStandardMaterialParameters>) {
   const mesh = new THREE.InstancedMesh(cached('unitR', () => new RoundedBoxGeometry(1, 1, 1, 1, 0.12)), std('#ffffff', extra), items.length);
   const m = new THREE.Matrix4();
@@ -170,16 +170,16 @@ function instancedBoxes(items: { p: [number, number, number]; s: [number, number
 }
 
 /**
- * اتاقِ گوشه = یک ربعِ کاملِ QUAD×QUAD که گازِ هشت‌ضلعیِ مرکزی از گوشهٔ داخلی‌اش
- * برداشته شده. نتیجه: هر دو اتاقِ همسایه یک دیوارِ مشترکِ واقعی دارند و هر اتاق
- * مستقیم به اتاقِ اصلی می‌چسبد — بدونِ هیچ راهرو و بدونِ درِ رو‌به‌رو.
- * خروجی در مختصاتِ **محلیِ** اتاق است (مرکزِ گروه = مرکزِ ربع).
+ * اتاق گوشه = یک ربع کامل QUAD×QUAD که گاز هشت‌ضلعی مرکزی از گوشه داخلی‌اش
+ * برداشته شده. نتیجه: هر دو اتاق همسایه یک دیوار مشترک واقعی دارند و هر اتاق
+ * مستقیم به اتاق اصلی می‌چسبد — بدون هیچ راهرو و بدون در رو‌به‌رو.
+ * خروجی در مختصات **محلی** اتاق است (مرکز گروه = مرکز ربع).
  */
 function cornerPolygon(room: RoomId): [number, number][] {
   const [cx, cz] = CENTERS[room];
   const sx = Math.sign(cx), sz = Math.sign(cz);
   const A = OCT_APOTHEM, t = OCT_HALFSIDE;
-  // در مختصاتِ جهانی، از گوشهٔ بیرونی به سمتِ مرکز
+  // در مختصات جهانی، از گوشه بیرونی به سمت مرکز
   const world: [number, number][] = [
     [sx * QUAD, sz * QUAD],
     [0, sz * QUAD],
@@ -199,14 +199,21 @@ function octPolygon(): [number, number][] {
   });
 }
 
-/** مرکزِ هندسیِ یک چندضلعی — برای تعیینِ جهتِ «بیرون» برای هر دیوار. */
-function polyCentroid(poly: [number, number][]): [number, number] {
-  let x = 0, z = 0;
-  for (const p of poly) { x += p[0]; z += p[1]; }
-  return [x / poly.length, z / poly.length];
+/**
+ * مساحت علامت‌دار؛ علامتش جهت چرخش چندضلعی را می‌دهد.
+ * اتاق‌های گوشه مقعرند (L شکل) و میانگین راس‌هایشان **بیرون** از خودشان می‌افتد
+ * (وسط هشت‌ضلعی)، پس جهت «بیرون» باید از چرخش حساب شود نه از مرکز.
+ */
+function signedArea(poly: [number, number][]): number {
+  let a = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const p = poly[i], q = poly[(i + 1) % poly.length];
+    a += p[0] * q[1] - q[0] * p[1];
+  }
+  return a / 2;
 }
 
-/** نقطه را روی دیوارِ نزدیک‌ترش می‌نشاند: [اندیسِ ضلع، t]. */
+/** نقطه را روی دیوار نزدیک‌ترش می‌نشاند: [اندیس ضلع، t]. */
 function locateOnWall(poly: [number, number][], p: [number, number]) {
   let best = { i: 0, t: 0, d: Infinity };
   poly.forEach((a, i) => {
@@ -259,28 +266,28 @@ export function buildWorld(): World {
   const labels = {} as Record<RoomId, CSS2DObject>;
   const interactables: Interactable[] = [];
   const focusPoints: Record<string, THREE.Vector3> = {};
-  /** هر یال دقیقاً یک درِ مشترک دارد؛ اتاق ۱ قفل‌هایش را روی همین پنل سوار می‌کند. */
+  /** هر یال دقیقا یک در مشترک دارد؛ اتاق ۱ قفل‌هایش را روی همین پنل سوار می‌کند. */
   const doorGroups: Record<string, { group: THREE.Group; panel: THREE.Mesh; pivot: THREE.Group }> = {};
   const syncers: ((s: GameState) => void)[] = [];
   const anims: Anim[] = [];
   const fxs: Fx[] = [];
   const tickers: ((t: number) => void)[] = [];
 
-  /** حرکتِ نرمِ پیوسته به سمتِ یک مقدارِ هدف (درها، درپوش‌ها). */
+  /** حرکت نرم پیوسته به سمت یک مقدار هدف (درها، درپوش‌ها). */
   const anim = (obj: THREE.Object3D, key: Anim['key'], target: number) => {
     const a = anims.find((x) => x.obj === obj && x.key === key);
     if (a) a.target = target;
     else anims.push({ obj, key, target });
   };
 
-  /** انیمیشنِ یک‌باره با زمانِ واقعی. */
+  /** انیمیشن یک‌باره با زمان واقعی. */
   const play = (dur: number, step: (k: number) => void, done?: () => void, delay = 0) => {
     fxs.push({ t0: performance.now() + delay * 1000, dur: dur * 1000, step, done });
   };
 
   /**
-   * گذارِ یک وضعیتِ بولی. `animate` فقط وقتی true است که مقدار در همین دور از false به true رفته باشد؛
-   * سینکِ اول و ریست بدونِ انیمیشن اعمال می‌شوند.
+   * گذار یک وضعیت بولی. `animate` فقط وقتی true است که مقدار در همین دور از false به true رفته باشد؛
+   * سینک اول و ریست بدون انیمیشن اعمال می‌شوند.
    */
   const onChange = (get: (s: GameState) => boolean, apply: (on: boolean, animate: boolean) => void) => {
     let prev: boolean | undefined;
@@ -325,10 +332,10 @@ export function buildWorld(): World {
   };
 
   // ───────── کف، دیوار، در، نور ─────────
-  // هر اتاقِ گوشه یک ربعِ کامل است که گازِ هشت‌ضلعی از گوشهٔ داخلی‌اش برداشته شده،
-  // پس هر دو اتاقِ همسایه یک دیوارِ مشترکِ واقعی دارند و هر در فقط **یک بار** ساخته می‌شود.
+  // هر اتاق گوشه یک ربع کامل است که گاز هشت‌ضلعی از گوشه داخلی‌اش برداشته شده،
+  // پس هر دو اتاق همسایه یک دیوار مشترک واقعی دارند و هر در فقط **یک بار** ساخته می‌شود.
   const roomGroups = {} as Record<RoomId, THREE.Group>;
-  /** گروهِ پراپ‌ها: مقیاسِ S، ولی مختصاتش همان فضای ۱۰×۱۰ قدیمی است. */
+  /** گروه پراپ‌ها: مقیاس S، ولی مختصاتش همان فضای ۱۰×۱۰ قدیمی است. */
   const propGroups = {} as Record<RoomId, THREE.Group>;
   const polys = {} as Record<RoomId, [number, number][]>;
 
@@ -354,28 +361,27 @@ export function buildWorld(): World {
     g.add(floor);
     floors.push(floor);
 
-    // درهای این اتاق، در مختصاتِ محلی
+    // درهای این اتاق، در مختصات محلی
     const doorsHere = gameData.doors
       .filter((e) => e.between.includes(r.id) && DOOR_AT[e.id])
       .map((e) => ({ edge: e, pos: [DOOR_AT[e.id][0] - cx, DOOR_AT[e.id][1] - cz] as [number, number] }));
     const located = doorsHere.map((d) => ({ ...d, ...locateOnWall(poly, d.pos) }));
 
     walls[r.id] = [];
-    const wallMat = () => std(r.palette.wall, { transparent: true, opacity: 1, roughness: 0.85 });
+    const wallMat = () => std(r.palette.wall, { roughness: 0.85 });
     const trimColor = new THREE.Color(r.palette.wall).multiplyScalar(0.62);
-    const [ccx, ccz] = polyCentroid(poly);
+    const ccw = signedArea(poly) > 0;
     poly.forEach((a, i) => {
       const b = poly[(i + 1) % poly.length];
       const dx = b[0] - a[0], dz = b[1] - a[1];
       const len = Math.hypot(dx, dz);
       if (len < 0.01) return;
       const ang = Math.atan2(-dz, dx);
-      const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-      // نرمالِ واقعیِ ضلع، رو به بیرونِ اتاق (نه تقریبِ «مرکز ≈ مبدأ»)
-      let nrm = new THREE.Vector3(dz, 0, -dx).normalize();
-      if (nrm.x * (mid[0] - ccx) + nrm.z * (mid[1] - ccz) < 0) nrm.negate();
-      // دیوار کمی به داخلِ اتاق می‌نشیند تا دیوارِ اتاقِ همسایه رویش نیفتد
-      const inset = new THREE.Vector3().copy(nrm).multiplyScalar(-WALL_T / 2);
+      // نرمال رو به بیرون اتاق، از روی جهت چرخش چندضلعی
+      const nrm = new THREE.Vector3(ccw ? dz : -dz, 0, ccw ? -dx : dx).normalize();
+      // دیوار کمی به داخل اتاق می‌نشیند تا دیوار اتاق همسایه رویش نیفتد
+      // نیم‌ضخامت به داخل + یک شکاف مویی، تا رویه دیوار دو اتاق همسایه دقیقا هم‌صفحه نشود
+      const inset = new THREE.Vector3().copy(nrm).multiplyScalar(-WALL_T / 2 - 0.0015);
 
       const gaps = located.filter((d) => d.i === i).map((d) => d.t * len).sort((x, y) => x - y);
       let cursor = 0;
@@ -394,11 +400,11 @@ export function buildWorld(): World {
         m.userData.normal = nrm;
         g.add(m);
         walls[r.id].push(m);
-        // قرنیزِ پایین و نوارِ بالا: جزئیاتِ ارزان که دیوار را از «کارتن» بیرون می‌آورد
+        // قرنیز پایین و نوار بالا: جزئیات ارزان که دیوار را از «کارتن» بیرون می‌آورد
         for (const [yy, hh] of baseboard
           ? ([[0.06 * S, 0.12 * S], [WALL_H - 0.03 * S, 0.06 * S]] as const)
           : ([[WALL_H - 0.03 * S, 0.06 * S]] as const)) {
-          const trim = new THREE.Mesh(new THREE.BoxGeometry(s1 - s0, hh, WALL_T * 1.3), std(trimColor, { transparent: true }));
+          const trim = new THREE.Mesh(new THREE.BoxGeometry(s1 - s0, hh, WALL_T * 1.3), std(trimColor));
           trim.position.set(m.position.x, yy, m.position.z).addScaledVector(nrm, -WALL_T * 0.15);
           trim.rotation.y = ang;
           trim.userData.normal = nrm;
@@ -415,7 +421,7 @@ export function buildWorld(): World {
     pl.position.set(0, 2.4 * S, 0);
     g.add(pl);
 
-    // برچسبِ نقشه
+    // برچسب نقشه
     const el = document.createElement('div');
     el.className = 'room-label';
     el.dataset.room = r.id;
@@ -426,23 +432,23 @@ export function buildWorld(): World {
     labels[r.id] = lbl;
   }
 
-  // ───────── درها: یکی برای هر یال، روی دیوارِ مشترک ─────────
+  // ───────── درها: یکی برای هر یال، روی دیوار مشترک ─────────
   for (const edge of gameData.doors) {
     const at = DOOR_AT[edge.id];
-    if (!at) continue;                       // داکتِ کولر جداگانه ساخته می‌شود
+    if (!at) continue;                       // داکت کولر جداگانه ساخته می‌شود
     const [ra, rb] = edge.between;
-    // نرمالِ در = جهتِ اتاقِ A به اتاقِ B
+    // نرمال در = جهت اتاق A به اتاق B
     const n = new THREE.Vector3(CENTERS[rb][0] - CENTERS[ra][0], 0, CENTERS[rb][1] - CENTERS[ra][1]).normalize();
     const dg = new THREE.Group();
     dg.position.set(at[0], 0, at[1]);
-    dg.rotation.y = Math.atan2(n.x, n.z);    // در این گروه، محورِ +z همان نرمالِ در است
+    dg.rotation.y = Math.atan2(n.x, n.z);    // در این گروه، محور +z همان نرمال در است
     root.add(dg);
 
     // چارچوب
     for (const sx of [-1, 1]) dg.add(rbox(0.1 * S, DOOR_H + 0.08 * S, 0.28 * S, '#2b2e35', sx * (DOOR_W / 2 + 0.02 * S), (DOOR_H + 0.08 * S) / 2, 0));
     dg.add(rbox(DOOR_W + 0.14 * S, 0.1 * S, 0.28 * S, '#2b2e35', 0, DOOR_H + 0.04 * S, 0));
 
-    // درِ لولایی: pivot روی لبهٔ شکاف
+    // در لولایی: pivot روی لبه شکاف
     const pivot = new THREE.Group();
     pivot.position.set(-DOOR_W / 2 + 0.03 * S, 0, 0);
     dg.add(pivot);
@@ -459,10 +465,10 @@ export function buildWorld(): World {
       }
     }
 
-    // هر سمتِ در، ظاهرِ خودش را دارد: دستگیره / پانیک‌بار / پدِ قفل / هیچ‌چیز
+    // هر سمت در، ظاهر خودش را دارد: دستگیره / پانیک‌بار / پد قفل / هیچ‌چیز
     const lamps: { side: typeof edge.sides[number]; mat: THREE.MeshBasicMaterial }[] = [];
     for (const side of edge.sides) {
-      // +z رو به اتاقِ B است، پس سمتِ A روی −z می‌نشیند
+      // +z رو به اتاق B است، پس سمت A روی −z می‌نشیند
       const f = side.room === rb ? 1 : -1;
       if (side.push) {
         const bar = cyl(0.03 * S, 0.03 * S, 1.0 * S, '#c9ccd2', 0, -0.05 * S, f * 0.12 * S, 16, { metalness: 0.9, roughness: 0.2 });
@@ -476,14 +482,14 @@ export function buildWorld(): World {
         lever.add(rbox(0.16 * S, 0.03 * S, 0.03 * S, '#cfd3d8', -0.07 * S, 0, f * 0.1 * S, { metalness: 0.9, roughness: 0.25 }, 0.012 * S));
         panel.add(lever);
       }
-      // قفل‌های اتاق ۱ روی خودِ D14 نصب می‌شوند (نه جعبه در اتاق) — پایین‌تر ساخته می‌شوند
+      // قفل‌های اتاق ۱ روی خود D14 نصب می‌شوند (نه جعبه در اتاق) — پایین‌تر ساخته می‌شوند
       if (side.puzzles?.length && !heavy) {
         const pad = rbox(0.2 * S, 0.3 * S, 0.05 * S, '#1d1f24', pw / 2 - 0.16 * S, (side.high ? 0.85 : 0.22) * S, f * 0.065 * S, { metalness: 0.4 });
         pad.add(new THREE.Mesh(new THREE.PlaneGeometry(0.14 * S, 0.06 * S), new THREE.MeshBasicMaterial({ color: '#6dff9a' }))
           .translateY(0.08 * S).translateZ(f * 0.027 * S).rotateY(f > 0 ? 0 : Math.PI));
         panel.add(pad);
       }
-      // چراغِ وضعیت، یکی برای هر سمت
+      // چراغ وضعیت، یکی برای هر سمت
       const mat = new THREE.MeshBasicMaterial({ color: '#888' });
       const lamp = new THREE.Mesh(cached('lamp', () => new THREE.SphereGeometry(0.09 * S, 20, 14)), mat);
       lamp.position.set(0, DOOR_H + 0.22 * S, f * 0.16 * S);
@@ -494,7 +500,7 @@ export function buildWorld(): World {
       dg.add(lampBase);
       lamps.push({ side, mat });
 
-      // قفلِ چرخشیِ مرتفعِ D25 (بالای چارچوب، با نردبان)
+      // قفل چرخشی مرتفع D25 (بالای چارچوب، با نردبان)
       if (side.high) {
         const highLock = new THREE.Group();
         highLock.position.set(0, DOOR_H + 0.3 * S, f * 0.17 * S);
@@ -516,11 +522,11 @@ export function buildWorld(): World {
       }
     }
 
-    // یک شیء، ولی از هر دو اتاق قابل‌کلیک (و هر اتاق نشانِ ⓘ خودش را دارد)
+    // یک شیء، ولی از هر دو اتاق قابل‌کلیک (و هر اتاق نشان ⓘ خودش را دارد)
     for (const side of edge.sides) register(side.room, `door:${edge.id}`, dg, side.doorId, DOOR_H + 0.5 * S);
     doorGroups[edge.id] = { group: dg, panel, pivot };
 
-    const openSign = 1; // همیشه به سمتِ اتاقِ A باز می‌شود
+    const openSign = 1; // همیشه به سمت اتاق A باز می‌شود
     syncers.push((s) => {
       const open = s.openEdges.has(edge.id);
       anim(pivot, 'ry', open ? openSign * 1.45 : 0);
@@ -530,31 +536,31 @@ export function buildWorld(): World {
     });
   }
 
-  // ───────── داکتِ کولر: بالای D25 در اتاق ۲ و بالای D51 در اتاق ۱ ─────────
-  // یک مجرای واحد با دو توری؛ باز شدن از هر سمت، سمتِ دیگر را هم باز می‌کند.
+  // ───────── داکت کولر: بالای D25 در اتاق ۲ و بالای D51 در اتاق ۱ ─────────
+  // یک مجرای واحد با دو توری؛ باز شدن از هر سمت، سمت دیگر را هم باز می‌کند.
   for (const [room, at] of Object.entries(VENT_AT) as [RoomId, [number, number]][]) {
     const [cx, cz] = CENTERS[room];
-    const n = new THREE.Vector3(-at[0], 0, -at[1]).normalize();   // رو به مرکزِ نقشه
-    const ang = Math.atan2(-n.x, -n.z);       // +z رو به داخلِ همین اتاق
-    // بالای D25 قفلِ چرخشیِ مرتفع نشسته، پس داکتِ اتاق ۲ کنار می‌رود تا رویش نیفتد
-    const slide = room === 'room2' ? 0.95 : 0;
+    const n = new THREE.Vector3(-at[0], 0, -at[1]).normalize();   // رو به مرکز نقشه
+    const ang = Math.atan2(-n.x, -n.z);       // +z رو به داخل همین اتاق
+    // بالای D25 قفل چرخشی مرتفع نشسته، پس داکت اتاق ۲ کنار می‌رود تا رویش نیفتد
+    const slide = room === 'room2' ? 0.95 : -0.95;
     const along = new THREE.Vector3(Math.cos(ang), 0, -Math.sin(ang));
     const dg = new THREE.Group();
     dg.position.set(at[0], DOOR_H + 0.34 * S, at[1]).addScaledVector(along, slide);
     dg.rotation.y = ang;
     root.add(dg);
 
-    // داکتِ فلزی که از دیوار بیرون زده
+    // داکت فلزی که از دیوار بیرون زده
     const duct = new THREE.Group();
     dg.add(duct);
     duct.add(rbox(1.25 * S, 0.9 * S, 0.5 * S, '#48505b', 0, 0, 0.22 * S, { metalness: 0.55, roughness: 0.4 }, 0.03 * S));
     for (const yy of [-0.42, 0.42]) duct.add(rbox(1.33 * S, 0.07 * S, 0.56 * S, '#39404a', 0, yy * S, 0.22 * S, { metalness: 0.6 }, 0.02 * S));
-    // بستِ اتصال به سقف
+    // بست اتصال به سقف
     duct.add(rbox(0.5 * S, 0.5 * S, 0.3 * S, '#39404a', 0, 0.5 * S, 0.1 * S, { metalness: 0.6 }, 0.02 * S));
 
     const grate = new THREE.Group();
     grate.position.set(0, 0, 0.47 * S);
-    const gi = new THREE.Group();            // pivot روی لبهٔ بالایی: توری به بیرون می‌افتد
+    const gi = new THREE.Group();            // pivot روی لبه بالایی: توری به بیرون می‌افتد
     gi.position.y = 0.38 * S;
     grate.add(gi);
     gi.add(rbox(1.1 * S, 0.7 * S, 0.04 * S, '#6b737e', 0, -0.38 * S, 0, { metalness: 0.6, roughness: 0.4 }, 0.02 * S));
@@ -563,7 +569,7 @@ export function buildWorld(): World {
       gi.add(cyl(0.02 * S, 0.02 * S, 0.03 * S, '#aab', sx * S, -0.38 * S + sy * S, 0.03 * S, 8).rotateX(Math.PI / 2));
     }
     dg.add(grate);
-    register(room, 'door:VENT', grate, room === 'room2' ? 'توریِ لقِ داکتِ کولر' : 'داکتِ کولرِ بالای در', 0.85 * S);
+    register(room, 'door:VENT', grate, room === 'room2' ? 'توری لق داکت کولر' : 'داکت کولر بالای در', 0.85 * S);
     onChange((s) => s.openEdges.has('VENT'), (open, animate) => {
       if (animate) {
         play(0.9, (k) => {
@@ -575,7 +581,7 @@ export function buildWorld(): World {
         grate.rotation.z = 0;
       }
     });
-    // دهانهٔ تاریکِ پشتِ توری
+    // دهانه تاریک پشت توری
     const mouth = box(1.08 * S, 0.68 * S, 0.02 * S, '#07090d', 0, 0, 0.45 * S);
     dg.add(mouth);
     void cx; void cz;
@@ -583,8 +589,8 @@ export function buildWorld(): World {
   // ───────── پراپ‌های مشترک ─────────
   const R = propGroups;
   /**
-   * فاصلهٔ نصبِ اشیای دیواری از مرکزِ اتاق، در فضای پراپ. دیوارها نیم‌ضخامت به داخل
-   * نشسته‌اند (تا دیوارِ اتاقِ همسایه رویشان نیفتد)، پس رویهٔ داخلی روی ۴٫۸ است.
+   * فاصله نصب اشیای دیواری از مرکز اتاق، در فضای پراپ. دیوارها نیم‌ضخامت به داخل
+   * نشسته‌اند (تا دیوار اتاق همسایه رویشان نیفتد)، پس رویه داخلی روی ۴٫۸ است.
    */
   const WALL_FACE = 4.72;
 
@@ -645,7 +651,7 @@ export function buildWorld(): World {
     return g;
   };
 
-  /** پوسترِ قاب‌دار روی دیوار. */
+  /** پوستر قاب‌دار روی دیوار. */
   const poster = (room: RoomId, map: THREE.Texture, x: number, y: number, z: number, rotY: number, w = 1.1, h = 1.5, frame = '#1b1b1f') => {
     const g = new THREE.Group();
     g.position.set(x, y, z);
@@ -655,8 +661,8 @@ export function buildWorld(): World {
     p.position.z = 0.012;
     g.add(p);
     R[room].add(g);
-    // پوستر رو به داخلِ اتاق است؛ نرمالِ دیوارش عکسِ همان جهت است. با همان دیوار محو می‌شود
-    // تا وقتی دوربین پشتِ دیوار است، پشتِ خالیِ قاب توی صورتِ بیننده نباشد.
+    // پوستر رو به داخل اتاق است؛ نرمال دیوارش عکس همان جهت است. با همان دیوار محو می‌شود
+    // تا وقتی دوربین پشت دیوار است، پشت خالی قاب توی صورت بیننده نباشد.
     g.userData.normal = new THREE.Vector3(-Math.sin(rotY), 0, -Math.cos(rotY));
     walls[room].push(g);
     return g;
@@ -673,7 +679,7 @@ export function buildWorld(): World {
     lidPivot.position.set(0, bh, -bd / 2);
     lidPivot.add(rbox(size + 0.01, size * 0.13, bd + 0.01, color, 0, size * 0.065, bd / 2, { roughness: 0.55 }, size * 0.04));
     g.add(lidPivot);
-    // قفلِ آویز
+    // قفل آویز
     const lock = new THREE.Group();
     lock.position.set(0, bh * 0.62, bd / 2 + 0.03);
     lock.add(rbox(size * 0.24, size * 0.2, 0.05, '#d4af37', 0, 0, 0, { metalness: 0.85, roughness: 0.3 }, 0.01));
@@ -707,21 +713,21 @@ export function buildWorld(): World {
   };
 
   /**
-   * قفلِ آویزِ نصب‌شده روی **خودِ در** (درخواستِ کاربر: در اتاق مگی فقط P14d و P14e
-   * جعبه‌اند؛ بقیه مستقیم روی D14 سوار می‌شوند). مختصات نسبت به مرکزِ پنلِ در است.
+   * قفل آویز نصب‌شده روی **خود در** (درخواست کاربر: در اتاق مگی فقط P14d و P14e
+   * جعبه‌اند؛ بقیه مستقیم روی D14 سوار می‌شوند). مختصات نسبت به مرکز پنل در است.
    */
   const doorLock = (room: RoomId, edgeId: string, puzzleId: string, u: number, v: number, color: string) => {
     const dgp = doorGroups[edgeId];
     if (!dgp) return;
     const edge = gameData.doors.find((e) => e.id === edgeId)!;
-    const f = room === edge.between[1] ? 1 : -1;      // کدام رویهٔ در به این اتاق است
+    const f = room === edge.between[1] ? 1 : -1;      // کدام رویه در به این اتاق است
     const pw = DOOR_W - 0.06 * S;
     const g = new THREE.Group();
     g.position.set(u * pw * 0.5, v * (DOOR_H - 0.03 * S) * 0.5, f * 0.05 * S);
     g.rotation.y = f > 0 ? 0 : Math.PI;
     dgp.panel.add(g);
     const sz = 0.3 * S;
-    // حلقهٔ پیچ‌شده به در + بدنهٔ قفل
+    // حلقه پیچ‌شده به در + بدنه قفل
     g.add(cyl(sz * 0.08, sz * 0.08, sz * 0.14, '#6d5a3a', 0, sz * 0.46, 0, 10, { metalness: 0.7, roughness: 0.4 }).rotateX(Math.PI / 2));
     const lock = new THREE.Group();
     lock.position.set(0, 0, sz * 0.12);
@@ -757,7 +763,7 @@ export function buildWorld(): World {
   {
     const room: RoomId = 'room1';
     computer(room, -0.8, -1.2, 0, 'MAGGIE ♥');
-    // صندلیِ چوبی پشتِ میز
+    // صندلی چوبی پشت میز
     const chair = new THREE.Group();
     chair.position.set(-0.8, 0, -0.35);
     chair.rotation.y = Math.PI + 0.2;
@@ -766,7 +772,7 @@ export function buildWorld(): World {
     for (const [lx, lz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) chair.add(cyl(0.022, 0.022, 0.46, '#7d5530', lx * 0.19, 0.23, lz * 0.18, 10));
     R[room].add(chair);
 
-    // قفسهٔ شمالی با ۶ جعبه و کتاب‌ها
+    // قفسه شمالی با ۶ جعبه و کتاب‌ها
     const shelf = new THREE.Group();
     shelf.position.set(-0.5, 0, -4.55);
     for (const y of [0.05, 0.85, 1.65]) shelf.add(rbox(6.2, 0.06, 0.7, '#a0703f', 0, y, 0, {}, 0.015));
@@ -783,10 +789,10 @@ export function buildWorld(): World {
     }
     shelf.add(instancedBoxes(books, { roughness: 0.8 }));
     R[room].add(shelf, shadowBlob(6.6, 1.1, -0.5, -4.4, 0.6));
-    // فقط دو معما به‌صورت جعبه در اتاق می‌مانند (درخواستِ کاربر)
+    // فقط دو معما به‌صورت جعبه در اتاق می‌مانند (درخواست کاربر)
     lockBox(room, 'P14d', -0.5 + 1.0, 0.88, -4.5, '#a17cff', 0.55);
     lockBox(room, 'P14e', -0.5 + 2.0, 0.08, -4.5, '#5cd6a1', 0.55);
-    // بقیهٔ قفل‌های سریِ P روی خودِ درِ سنگینِ گوشه (D14) نصب‌اند — دو ستون، پنج ردیف
+    // بقیه قفل‌های سری P روی خود در سنگین گوشه (D14) نصب‌اند — دو ستون، پنج ردیف
     const onDoor: [string, string][] = [
       ['P14a', '#ff8fb1'], ['Pf14c', '#ffcf5c'],
       ['P14b', '#d9534f'], ['Pf14a', '#f0ad4e'],
@@ -796,7 +802,7 @@ export function buildWorld(): World {
     ];
     onDoor.forEach(([id, c], i) => doorLock(room, 'E14', id, i % 2 ? 0.42 : -0.42, 0.62 - Math.floor(i / 2) * 0.3, c));
 
-    // تودهٔ عروسک‌ها: بدن + سر + گوش، چند تا با چشم
+    // توده عروسک‌ها: بدن + سر + گوش، چند تا با چشم
     const pile = new THREE.Group();
     pile.position.set(-3.6, 0, -2.6);
     const dollColors = ['#ff9ec7', '#ffd36e', '#8fd1ff', '#c3a6ff', '#9be29b', '#ffb38a'];
@@ -814,7 +820,7 @@ export function buildWorld(): World {
       pile.add(d);
     }
     R[room].add(pile, shadowBlob(2.2, 2.2, -3.6, -2.6, 0.7));
-    // عروسکِ زیپ‌دار (کلید ۱)
+    // عروسک زیپ‌دار (کلید ۱)
     const doll = new THREE.Group();
     doll.position.set(-3.6, 0.95, -2.6);
     doll.rotation.y = 0.5;
@@ -828,7 +834,7 @@ export function buildWorld(): World {
       doll.add(capsule(0.065, 0.1, pink, ex * 0.9, -0.28, 0.06).rotateX(-1.1));
     }
     doll.add(sphere(0.035, '#c2185b', 0, 0.38, 0.2));
-    // زیپ: خطِ دندانه + کشوی طلایی
+    // زیپ: خط دندانه + کشوی طلایی
     const zipLine = box(0.02, 0.32, 0.02, '#b38b2e', 0, 0, 0.215, { metalness: 0.8 });
     doll.add(zipLine);
     const pull = new THREE.Group();
@@ -837,7 +843,7 @@ export function buildWorld(): World {
     pull.add(rbox(0.025, 0.06, 0.008, '#d4af37', 0, -0.045, 0.004, { metalness: 0.9, roughness: 0.25 }, 0.004));
     doll.add(pull);
     R[room].add(doll);
-    register(room, 'key:key1', doll, 'عروسکِ زیپ‌دار', 1.0);
+    register(room, 'key:key1', doll, 'عروسک زیپ‌دار', 1.0);
     onChange((s) => s.keysFound.has('key1'), (found, animate) => {
       if (animate) {
         play(0.55, (k) => (pull.position.y = 0.15 - easeInOut(k) * 0.3));
@@ -846,8 +852,8 @@ export function buildWorld(): World {
       } else pull.position.y = found ? -0.15 : 0.15;
     });
 
-    // پوسترهای رنگی‌رنگی. دیوارهای رو به مرکزِ نقشه آن‌هایی‌اند که دوربینِ اتاق می‌بیند،
-    // پس پوسترهای اصلی آن‌جا می‌نشینند؛ چندتایی هم روی دیوارهای بیرونی برای شلوغیِ اتاق.
+    // پوسترهای رنگی‌رنگی. دیوارهای رو به مرکز نقشه آن‌هایی‌اند که دوربین اتاق می‌بیند،
+    // پس پوسترهای اصلی آن‌جا می‌نشینند؛ چندتایی هم روی دیوارهای بیرونی برای شلوغی اتاق.
     const MAGGIE_POSTERS: [string, string][] = [
       ['ماجراجویی!', '#ff8a5c'], ['دوستی', '#ffcf5c'], ['۱+۱=۳ ؟', '#5ca8ff'],
       ['بخند!', '#8fd1ff'], ['امروز', '#9be29b'], ['با هم', '#ffb38a'],
@@ -864,10 +870,10 @@ export function buildWorld(): World {
       const p = wall === 'E'
         ? poster(room, t, WALL_FACE, y, u, -Math.PI / 2, w, hh, '#7d5530')
         : poster(room, t, u, y, WALL_FACE, Math.PI, w, hh, '#7d5530');
-      p.rotation.z = ((i * 37) % 7 - 3) * 0.012;   // کمی کج، مثلِ خودِ مگی
+      p.rotation.z = ((i * 37) % 7 - 3) * 0.012;   // کمی کج، مثل خود مگی
     });
     poster(room, textTexture(['مگی', 'همیشه کنارت'], { bg: '#fff1e0', fg: '#d0533a', size: 64, w: 384, h: 512, wall: true }), -0.95, 0.95, WALL_FACE, Math.PI, 0.74, 0.92, '#7d5530');
-    // چندتا هم روی دیوارهای بیرونی (با دیوار محو می‌شوند، ولی موقعِ چرخاندنِ دوربین دیده می‌شوند)
+    // چندتا هم روی دیوارهای بیرونی (با دیوار محو می‌شوند، ولی موقع چرخاندن دوربین دیده می‌شوند)
     poster(room, textTexture(['خانه'], { bg: '#ffcf5c', fg: '#2b1a10', size: 70, w: 384, h: 512, wall: true }), -WALL_FACE, 1.9, 1.3, Math.PI / 2, 0.76, 0.96, '#7d5530');
     poster(room, textTexture(['قهرمان'], { bg: '#ff8a5c', fg: '#2b1a10', size: 64, w: 384, h: 512, wall: true }), -WALL_FACE, 1.85, 3.0, Math.PI / 2, 0.7, 0.9, '#7d5530');
 
@@ -888,7 +894,7 @@ export function buildWorld(): World {
     }
     R[room].add(sofa, shadowBlob(2.5, 1.3, -2.2, 2.9, 0.7));
 
-    // فرش با حاشیه (از گوشهٔ هشت‌ضلعی دور شد)
+    // فرش با حاشیه (از گوشه هشت‌ضلعی دور شد)
     const rug = new THREE.Mesh(new THREE.CircleGeometry(1.25, 48), std('#c0392b', { roughness: 1 }));
     rug.rotation.x = -Math.PI / 2;
     rug.position.set(-1.0, 0.03, 1.1);
@@ -901,12 +907,12 @@ export function buildWorld(): World {
       ring.renderOrder = 3;
       R[room].add(ring);
     }
-    // پُف (بین‌بگ)
+    // پف (بین‌بگ)
     const bean = sphere(0.5, '#ff8a5c', -4.0, 0.3, 1.1, { roughness: 0.95 });
     bean.scale.set(1, 0.6, 1);
     R[room].add(bean, shadowBlob(1.3, 1.3, -4.0, 1.1));
 
-    // چند تیکه لگوی پخش‌شده روی زمین (سرنخِ بصریِ قفلِ P14h)
+    // چند تیکه لگوی پخش‌شده روی زمین (سرنخ بصری قفل P14h)
     const LEGO = ['#e53935', '#fb8c00', '#fdd835', '#43a047', '#1e88e5', '#3949ab', '#8e24aa'];
     const bricks: { p: [number, number, number]; s: [number, number, number]; c: string; ry?: number }[] = [];
     const studs: { p: [number, number, number]; s: [number, number, number]; c: string }[] = [];
@@ -929,7 +935,7 @@ export function buildWorld(): World {
     const dk = desk(2.2, 1.1, '#8d99a6', '#6c7783', true);
     dk.position.set(1.8, 0, 1.6);
     R[room].add(dk, shadowBlob(2.6, 1.5, 1.8, 1.6));
-    // صندلیِ تنها
+    // صندلی تنها
     const stool = new THREE.Group();
     stool.position.set(1.8, 0, 2.6);
     stool.add(cyl(0.22, 0.22, 0.05, '#4a5868', 0, 0.5, 0, 28, { metalness: 0.5 }));
@@ -939,7 +945,7 @@ export function buildWorld(): World {
       stool.add(leg);
     }
     R[room].add(stool, shadowBlob(0.7, 0.7, 1.8, 2.6));
-    // مانیتورِ اوی
+    // مانیتور اوی
     const mon = monitor(room, ['>_', 'evy…']);
     mon.position.set(1.8, 0.805, 1.25);
     R[room].add(mon);
@@ -972,24 +978,21 @@ export function buildWorld(): World {
         kb.rotation.set(0, found ? 0.35 : 0, 0);
       }
     });
-    // تنها قفسهٔ اتاق — قطعاتِ اسکرابل و چراغ‌قوه روی آن می‌نشینند (درخواستِ کاربر)
+    // تنها قفسه اتاق — قطعات اسکرابل و چراغ‌قوه روی آن می‌نشینند (درخواست کاربر)
     const shelf = new THREE.Group();
     shelf.position.set(4.1, 0, -4.5);
     const SHELF_Y = [0.42, 1.02, 1.62];
     for (const y of SHELF_Y) shelf.add(rbox(1.5, 0.05, 0.52, '#6c7783', 0, y, 0, { metalness: 0.5, roughness: 0.45 }, 0.012));
     for (const x of [-0.72, 0.72]) shelf.add(rbox(0.07, 1.78, 0.52, '#58626e', x, 0.89, 0, { metalness: 0.55 }, 0.012));
     shelf.add(rbox(1.5, 1.78, 0.04, '#3e4753', 0, 0.89, -0.26, { metalness: 0.4 }));
-    // چند جعبهٔ خالیِ بایگانی — اتاقِ اوی حتی قفسه‌اش هم خلوت است
-    shelf.add(rbox(0.34, 0.26, 0.3, '#55606d', -0.44, 0.6, 0.02, { roughness: 0.8 }, 0.02));
-    shelf.add(rbox(0.3, 0.22, 0.28, '#4d5764', 0.48, 1.78, 0.02, { roughness: 0.8 }, 0.02));
     R[room].add(shelf, shadowBlob(1.8, 0.8, 4.1, -4.4, 0.6));
 
-    // قطعاتِ اسکرابل — خودِ تصویرِ تیم (fig-scrabble.jpg) روی طبقهٔ وسطِ قفسه
+    // قطعات اسکرابل — خود تصویر تیم (fig-scrabble.jpg) روی طبقه وسط قفسه
     const tiles = new THREE.Group();
     tiles.position.set(3.95, SHELF_Y[1] + 0.035, -4.45);
     const scrabbleAsset = puzzleById('P24b')!.asset!;
     const sheet = plane(0.46, 0.46, assetTexture(scrabbleAsset, () => {
-      // تا وقتی فایلِ تیم نیست: همان چیدمانِ حرف‌ها روی کاشی‌های کرم‌رنگ
+      // تا وقتی فایل تیم نیست: همان چیدمان حرف‌ها روی کاشی‌های کرم‌رنگ
       const c = document.createElement('canvas');
       c.width = c.height = 512;
       const g = c.getContext('2d')!;
@@ -1018,13 +1021,13 @@ export function buildWorld(): World {
     tiles.add(rbox(0.5, 0.02, 0.5, '#2c333c', 0, -0.008, 0, { roughness: 0.6 }, 0.01));
     tiles.add(sheet);
     R[room].add(tiles);
-    register(room, 'puzzle:P24b', tiles, 'قطعاتِ اسکرابل', 0.55);
-    // کاغذِ زیرِ میز
+    register(room, 'puzzle:P24b', tiles, 'قطعات اسکرابل', 0.55);
+    // کاغذ زیر میز
     const paper = box(0.35, 0.005, 0.25, '#fff7a8', 1.0, 0.75, 1.95, { roughness: 0.9 });
     paper.rotation.y = 0.15;
     R[room].add(paper);
-    register(room, 'clue:C2paper', paper, 'کاغذی زیرِ میز', 0.5);
-    // نردبان — کنارِ دیوارِ غربی، نزدیکِ درِ D25 ولی بیرونِ محدودهٔ هشت‌ضلعی
+    register(room, 'clue:C2paper', paper, 'کاغذی زیر میز', 0.5);
+    // نردبان — کنار دیوار غربی، نزدیک در D25 ولی بیرون محدوده هشت‌ضلعی
     const ladder = new THREE.Group();
     ladder.position.set(-3.9, 0, 1.3);
     ladder.rotation.y = Math.PI / 4;
@@ -1034,7 +1037,7 @@ export function buildWorld(): World {
     for (const x of [-0.25, 0.25]) ladder.add(rbox(0.09, 0.05, 0.12, '#222', x, 0.025, 0));
     R[room].add(ladder, shadowBlob(0.9, 0.6, -3.9, 1.3));
     register(room, 'prop:ladder', ladder, 'نردبان', 2.9);
-    // چراغ‌قوه + نورش — روی طبقهٔ بالاییِ همان قفسه
+    // چراغ‌قوه + نورش — روی طبقه بالایی همان قفسه
     const fl = new THREE.Group();
     fl.position.set(4.45, SHELF_Y[2] + 0.075, -4.4);
     const flBody = new THREE.Group();
@@ -1057,16 +1060,16 @@ export function buildWorld(): World {
       spot.intensity = s.flashlight ? 40 : 0;
       (lens.material as THREE.MeshStandardMaterial).emissiveIntensity = s.flashlight ? 2 : 0;
     });
-    // پوسترِ کلمه‌های به‌هم‌ریخته؛ فقط LIAR قرمز است
+    // پوستر کلمه‌های به‌هم‌ریخته؛ فقط LIAR قرمز است
     const lp = poster(room, canvasTexture(liarCanvas()), -WALL_FACE, 1.45, 4.1, Math.PI / 2, 1.1, 1.52, '#0b0e12');
-    register(room, 'clue:C2poster', lp, 'پوسترِ کلمه‌های به‌هم‌ریخته', 1.05);
+    register(room, 'clue:C2poster', lp, 'پوستر کلمه‌های به‌هم‌ریخته', 1.05);
   }
 
   // ── اتاق ۳ (Devan): نئونی، کج ──
   {
     const room: RoomId = 'room3';
     computer(room, 2.2, -2.6, 0.12, 'DEVAN ;)', 0.18);
-    // صندلیِ چرخ‌دارِ کج
+    // صندلی چرخ‌دار کج
     const chair = new THREE.Group();
     chair.position.set(1.6, 0, -1.5);
     chair.rotation.set(0.12, 0.6, 0.1);
@@ -1080,12 +1083,12 @@ export function buildWorld(): World {
     chair.add(rbox(0.52, 0.08, 0.5, '#2d2d3a', 0, 0.5, 0, { roughness: 0.8 }, 0.035));
     chair.add(rbox(0.5, 0.62, 0.07, '#2d2d3a', 0, 0.86, 0.24, { roughness: 0.8 }, 0.035).rotateX(-0.12));
     R[room].add(chair, shadowBlob(0.9, 0.9, 1.6, -1.5));
-    // دیوارِ پوستر: زیاد، رنگی، ریز و درشت کنارِ هم — بیشترشان چرت‌وپرتِ محض.
-    // دیوارهای رو به مرکزِ نقشه (x=-5 و z=+5) آن‌هایی‌اند که دوربینِ اتاق می‌بیند؛
-    // هر کدام دو بازهٔ آزاد کنارِ در دارند و با چیدمانِ آجری پر می‌شوند.
+    // دیوار پوستر: زیاد، رنگی، ریز و درشت کنار هم — بیشترشان چرت‌وپرت محض.
+    // دیوارهای رو به مرکز نقشه (x=-5 و z=+5) آن‌هایی‌اند که دوربین اتاق می‌بیند؛
+    // هر کدام دو بازه آزاد کنار در دارند و با چیدمان آجری پر می‌شوند.
     const posters: THREE.Group[] = [];
     let pIdx = 0;
-    /** یک بازهٔ دیوار را با پوسترهای ریز و درشت پر می‌کند. */
+    /** یک بازه دیوار را با پوسترهای ریز و درشت پر می‌کند. */
     const fillWall = (wall: 'W' | 'N', u0: number, u1: number, big: boolean) => {
       const rows: [number, number][] = big ? [[1.92, 0.92], [0.92, 0.84]] : [[2.02, 0.7], [1.22, 0.74], [0.5, 0.56]];
       for (const [y, hh] of rows) {
@@ -1106,11 +1109,11 @@ export function buildWorld(): World {
         }
       }
     };
-    fillWall('W', -4.92, -3.32, true);     // دیوارِ غربی، پایینِ درِ D13
-    fillWall('W', -1.72, -0.12, true);     // دیوارِ غربی، بالای درِ D13
-    fillWall('N', 0.12, 1.72, false);      // دیوارِ شمالی، کنارِ درِ D23
+    fillWall('W', -4.92, -3.32, true);     // دیوار غربی، پایین در D13
+    fillWall('W', -1.72, -0.12, true);     // دیوار غربی، بالای در D13
+    fillWall('N', 0.12, 1.72, false);      // دیوار شمالی، کنار در D23
     fillWall('N', 3.32, 4.92, false);
-    // چند پوستر روی دیوارهای بیرونی هم هست (با دیوار محو می‌شوند، با چرخشِ دوربین پیدا)
+    // چند پوستر روی دیوارهای بیرونی هم هست (با دیوار محو می‌شوند، با چرخش دوربین پیدا)
     const adTex = canvasTexture(adsCanvas());
     posters.push(poster(room, adTex, -3.5, 1.62, -WALL_FACE, 0, 1.05, 1.44, '#ff3fd2'));
     for (const [x, y, w, hh] of [[-1.9, 1.8, 0.8, 1.06], [-0.5, 1.2, 0.66, 0.9], [0.9, 1.9, 0.72, 0.5], [2.3, 1.6, 0.9, 1.2], [3.6, 1.0, 0.7, 0.5]] as const) {
@@ -1119,8 +1122,8 @@ export function buildWorld(): World {
     for (const [z, y, w, hh] of [[-3.9, 1.8, 0.8, 1.08], [-2.6, 0.9, 0.7, 0.5], [-1.4, 1.7, 0.86, 1.16], [0.4, 1.9, 0.6, 0.8], [1.9, 1.3, 0.78, 1.04], [3.4, 1.8, 0.68, 0.92]] as const) {
       posters.push(poster(room, canvasTexture(junkPosterCanvas(pIdx++)), WALL_FACE, y, z, -Math.PI / 2, w, hh, '#1b1b1f'));
     }
-    posters.forEach((p) => register(room, 'clue:C3poster', p, 'دیوارِ پوسترها', 0.8));
-    // نوارِ نئونی بالای دیوارها
+    posters.forEach((p) => register(room, 'clue:C3poster', p, 'دیوار پوسترها', 0.8));
+    // نوار نئونی بالای دیوارها
     for (const [x, z, ry, l] of [[-0.7, -4.82, 0, 8.4], [4.82, 0.3, Math.PI / 2, 8.4]] as const) {
       const neon = box(l, 0.05, 0.05, '#ff3fd2', x, WALL_H - 0.2, z, { emissive: new THREE.Color('#ff3fd2'), emissiveIntensity: 2.2 });
       neon.rotation.y = ry;
@@ -1145,7 +1148,7 @@ export function buildWorld(): World {
       key3.visible = !found;
       if (animate) popCollect(R[room], key3.position.clone(), 'key');
     });
-    // فرش + سکهٔ ۶۴ (از گوشهٔ هشت‌ضلعی دور شد)
+    // فرش + سکه ۶۴ (از گوشه هشت‌ضلعی دور شد)
     const RUG: [number, number] = [-1.6, -2.6];
     const rug = rbox(3.4, 0.05, 2.4, '#7a2c8f', RUG[0], 0.025, RUG[1], { roughness: 1 }, 0.008);
     R[room].add(rug);
@@ -1163,13 +1166,13 @@ export function buildWorld(): World {
     const coin64 = coinMesh('64');
     coin64.position.set(RUG[0] + 1.45, 0.045, RUG[1] + 1.0);
     R[room].add(coin64);
-    register(room, 'coin:coin64', corner, 'گوشهٔ تاخوردهٔ فرش', 0.6);
+    register(room, 'coin:coin64', corner, 'گوشه تاخورده فرش', 0.6);
     onChange((s) => s.coinsFound.has('coin64'), (found, animate) => {
       anim(corner, 'rz', found ? 1.3 : 0.18);
       coin64.visible = !found;
       if (animate) popCollect(R[room], coin64.position.clone(), 'coin', '64', 0.3);
     });
-    // قفسه + سکهٔ ۱۰۱
+    // قفسه + سکه ۱۰۱
     const shelf = new THREE.Group();
     shelf.position.set(4.55, 0, 3.4);
     for (const y of [0.4, 1.0, 1.6]) shelf.add(rbox(0.5, 0.05, 1.6, '#5a3a72', 0, y, 0, {}, 0.012));
@@ -1185,12 +1188,12 @@ export function buildWorld(): World {
     const edge = box(0.2, 0.25, 0.2, '#5a3a72', 4.3, 1.66, 4.2);
     (edge.material as THREE.MeshStandardMaterial).visible = false; // فقط برای کلیک
     R[room].add(edge);
-    register(room, 'coin:coin101', edge, 'لبهٔ قفسه', 0.5);
+    register(room, 'coin:coin101', edge, 'لبه قفسه', 0.5);
     onChange((s) => s.coinsFound.has('coin101'), (found, animate) => {
       coin101.visible = !found;
       if (animate) popCollect(R[room], coin101.position.clone(), 'coin', '101');
     });
-    // کیبوردِ به‌هم‌ریخته و کاغذهای پخش‌شده روی زمین
+    // کیبورد به‌هم‌ریخته و کاغذهای پخش‌شده روی زمین
     const kb = keyboard(0.8, 0.28, '#1f1f28', '#ff3fd2');
     kb.position.set(-1.5, 0.02, -1.8);
     kb.rotation.set(0, 0.9, 0.05);
@@ -1200,12 +1203,12 @@ export function buildWorld(): World {
       p.rotation.y = i * 1.7;
       R[room].add(p);
     }
-    // کاغذِ مچالهٔ معمای متناقض — قابلِ کلیک، و تنها جایی که اسمِ «کامران» نوشته شده
+    // کاغذ مچاله معمای متناقض — قابل کلیک، و تنها جایی که اسم «کامران» نوشته شده
     const note = new THREE.Group();
     note.position.set(0.55, 0, -2.15);
     note.rotation.y = -0.5;
     note.add(box(0.46, 0.004, 0.6, '#f2ead8', 0, 0.018, 0, { roughness: 0.95 }));
-    // چند چینِ بلندشده تا «مچاله» دیده شود
+    // چند چین بلندشده تا «مچاله» دیده شود
     for (const [dx, dz, ry, rz] of [[-0.14, 0.17, 0.5, 0.22], [0.17, -0.1, -0.7, -0.3], [0.05, 0.26, 0.2, 0.16]] as const) {
       const f = box(0.2, 0.003, 0.22, '#e7dcc4', dx, 0.028, dz, { roughness: 0.95 });
       f.rotation.set(0, ry, rz);
@@ -1216,14 +1219,14 @@ export function buildWorld(): World {
     noteFace.position.y = 0.021;
     note.add(noteFace);
     R[room].add(note);
-    register(room, 'clue:C3note', note, 'کاغذِ مچاله روی زمین', 0.45);
+    register(room, 'clue:C3note', note, 'کاغذ مچاله روی زمین', 0.45);
   }
 
   // ── اتاق ۴ (Echo): آزمایشگاهی ──
   {
     const room: RoomId = 'room4';
     computer(room, 2.6, 2.8, -Math.PI / 2, 'ECHO ∎');
-    // میز و صفحهٔ شطرنج با مهره‌های تراش‌خورده
+    // میز و صفحه شطرنج با مهره‌های تراش‌خورده
     const ct = new THREE.Group();
     ct.position.set(0, 0, 0.6);
     ct.add(rbox(1.4, 0.06, 1.4, '#ffffff', 0, 0.75, 0, { roughness: 0.35 }, 0.02));
@@ -1245,7 +1248,7 @@ export function buildWorld(): World {
     const pieceGeo = (kind: Kind) =>
       cached(`piece-${kind}`, () => new THREE.LatheGeometry(PROFILE[kind].map(([x, y]) => new THREE.Vector2(x, y)), 20));
 
-    // چیدمان عیناً از fig-chess.jpg — وضعیتِ بعد از ۲۳.Kg1، نوبتِ سیاه، و Nh3# مات است.
+    // چیدمان عینا از fig-chess.jpg — وضعیت بعد از ۲۳.Kg1، نوبت سیاه، و Nh3# مات است.
     const WHITE = '#f4efe4', BLACK = '#151515';
     const POSITION: [string, string, Kind][] = [
       ['b8', BLACK, 'bishop'], ['f8', BLACK, 'rook'], ['g8', BLACK, 'king'],
@@ -1257,7 +1260,7 @@ export function buildWorld(): World {
       ['d2', WHITE, 'rook'], ['f2', WHITE, 'pawn'], ['h2', WHITE, 'pawn'],
       ['f1', WHITE, 'rook'], ['g1', WHITE, 'king'],
     ];
-    /** a1 گوشهٔ تاریکِ نزدیکِ سفید؛ ردیفِ ۸ در دورترین z. */
+    /** a1 گوشه تاریک نزدیک سفید؛ ردیف ۸ در دورترین z. */
     const sq = (name: string): [number, number] => {
       const i = name.charCodeAt(0) - 97;          // a..h
       const j = 8 - Number(name[1]);              // rank 8 → j=0
@@ -1278,7 +1281,7 @@ export function buildWorld(): World {
         ct.add(box(0.016, 0.022, 0.016, c, px + Math.cos(a) * 0.03, 0.962, pz + Math.sin(a) * 0.03, { roughness: 0.3 }));
       }
       if (kind === 'bishop') ct.add(sphere(0.011, c, px, 0.983, pz, { roughness: 0.3 }));
-      // سرِ اسب رو به حریف می‌ایستد
+      // سر اسب رو به حریف می‌ایستد
       if (kind === 'knight') {
         const head = rbox(0.034, 0.05, 0.068, c, px, 0.97, pz + (c === BLACK ? -0.012 : 0.012), { roughness: 0.3 }, 0.01);
         head.rotation.x = c === BLACK ? -0.4 : 0.4;
@@ -1286,9 +1289,9 @@ export function buildWorld(): World {
       }
     }
     R[room].add(ct, shadowBlob(1.8, 1.8, 0, 0.6));
-    register(room, 'clue:C4chess', ct, 'صفحهٔ شطرنج', 1.3);
+    register(room, 'clue:C4chess', ct, 'صفحه شطرنج', 1.3);
 
-    // گاوصندوق‌ها: بدنه، در، فرمانِ چرخان با پره، لولا
+    // گاوصندوق‌ها: بدنه، در، فرمان چرخان با پره، لولا
     const safe = (x: number, z: number, s: number, puzzleId: string, rotY: number) => {
       const g = new THREE.Group();
       g.position.set(x, 0, z);
@@ -1308,7 +1311,7 @@ export function buildWorld(): World {
         const kp = rbox(s * 0.22, s * 0.3, 0.02, '#111', -s * 0.18, s * 0.05, 0.04, {}, 0.006);
         door.add(kp);
       } else {
-        // تصویرِ شبکهٔ عصبیِ تیم (fig-nn.jpg) روی درِ گاوصندوق + ۸ پینِ قفلِ الگویی کنارش
+        // تصویر شبکه عصبی تیم (fig-nn.jpg) روی در گاوصندوق + ۸ پین قفل الگویی کنارش
         const nn = puzzleById('P40a')!.nn!;
         const img = plane(s * 0.52, s * 0.35, assetTexture('fig-nn.jpg', () => nnCanvas(nn.input, nn.output), 'contain', '#121212'));
         img.position.set(s * 0.14, s * 0.14, 0.035);
@@ -1335,12 +1338,12 @@ export function buildWorld(): World {
     safe(-4.25, 1.5, 1.0, 'P40a', Math.PI / 2);
     safe(-4.3, 3.9, 0.6, 'P45b', Math.PI / 2);
 
-    // ── یک پوسترِ واحد با چهار بخش (نه چهار قابِ جدا). هیچ فلشی روی آن نیست:
+    // ── یک پوستر واحد با چهار بخش (نه چهار قاب جدا). هیچ فلشی روی آن نیست:
     //    گزینه‌ها روی راس‌های یک لوزی می‌نشینند و موقعیتشان همان جهت است.
-    //    روی دیوارِ شرقی که دوربینِ اتاق مستقیم به آن نگاه می‌کند.
+    //    روی دیوار شرقی که دوربین اتاق مستقیم به آن نگاه می‌کند.
     const P41W = 1.52, P41H = 1.52;
     const board = poster(room, p41PosterTexture(), WALL_FACE, 1.45, 0.95, -Math.PI / 2, P41W, P41H, '#2f80ed');
-    // چهار ناحیهٔ شفافِ کلیک‌پذیر روی همان پوستر، یکی برای هر بخش
+    // چهار ناحیه شفاف کلیک‌پذیر روی همان پوستر، یکی برای هر بخش
     (['P41a', 'P41b', 'P41c', 'P41d'] as const).forEach((id, i) => {
       const hit = new THREE.Mesh(
         new THREE.PlaneGeometry(P41W / 2 - 0.03, P41H / 2 - 0.03),
@@ -1353,32 +1356,32 @@ export function buildWorld(): World {
       register(room, `puzzle:${id}`, hit, puzzleById(id)!.title, 0.46);
     });
 
-    // ── سه قابِ عکسِ آدم‌ها (جایگزینِ آدمک‌ها): ۲ + ۶ + ۱۴ = ۲۲ ──
+    // ── سه قاب عکس آدم‌ها (جایگزین آدمک‌ها): ۲ + ۶ + ۱۴ = ۲۲ ──
     const photoFrame = (clueId: string, file: string, n: number, x: number, y: number, z: number, ry: number, w: number, hh: number) => {
       const g = poster(room, assetTexture(file, () => peopleFallbackCanvas(n, n * 37 + 11, w / hh), 'cover'), x, y, z, ry, w, hh, '#20242b');
-      // قابِ عکس: پاس‌پارتو + یک چراغِ کوچکِ بالای قاب
+      // قاب عکس: پاس‌پارتو + یک چراغ کوچک بالای قاب
       g.add(rbox(w + 0.14, hh + 0.14, 0.02, '#e8eaee', 0, 0, -0.012, { roughness: 0.6 }, 0.01));
       g.add(rbox(0.22, 0.045, 0.1, '#3a4049', 0, hh / 2 + 0.11, 0.05, { metalness: 0.5 }, 0.015));
       register(room, `clue:${clueId}`, g, clueById(clueId)!.title, hh / 2 + 0.28);
       return g;
     };
-    // دیوارِ جنوبی (رو به دوربین): دو قاب کنارِ درِ D41
+    // دیوار جنوبی (رو به دوربین): دو قاب کنار در D41
     photoFrame('C4photoA', 'fig-people-1.jpg', 2, -4.1, 1.72, -WALL_FACE, 0, 1.4, 0.79);
     photoFrame('C4photoC', 'fig-people-3.jpg', 14, -0.92, 1.62, -WALL_FACE, 0, 1.45, 0.97);
-    // دیوارِ شرقی (رو به دوربین): قابِ سوم زیرِ تخته‌سیاه
+    // دیوار شرقی (رو به دوربین): قاب سوم زیر تخته‌سیاه
     photoFrame('C4photoB', 'fig-people-2.jpg', 6, WALL_FACE, 0.76, 4.12, -Math.PI / 2, 1.3, 0.87);
-    // نمودار (تزئینی) روی دیوارِ بیرونی
+    // نمودار (تزئینی) روی دیوار بیرونی
     poster(room, canvasTexture(chartCanvas()), -WALL_FACE, 1.66, -2.4, Math.PI / 2, 0.82, 0.62, '#cbd5e1');
-    // تخته‌سیاه با جاگچی، روی دیوارِ شرقی
+    // تخته‌سیاه با جاگچی، روی دیوار شرقی
     const bb = poster(room, canvasTexture(blackboardCanvas()), WALL_FACE, 1.82, 4.12, -Math.PI / 2, 1.5, 0.78, '#6b4a2b');
     bb.add(rbox(1.5, 0.04, 0.1, '#6b4a2b', 0, -0.43, 0.05), rbox(0.08, 0.02, 0.02, '#f5f5f5', 0.38, -0.4, 0.06, {}, 0.008));
     register(room, 'clue:C4board', bb, 'تخته‌سیاه', 0.8);
   }
 
-  // ── اتاق اصلی: سکو دقیقاً وسطِ اتاق، چهار سوراخ روی چهار طرفِ سکو، پروتکل روی خودِ سکو ──
+  // ── اتاق اصلی: سکو دقیقا وسط اتاق، چهار سوراخ روی چهار طرف سکو، پروتکل روی خود سکو ──
   {
     const room: RoomId = 'room5';
-    // سکوی مدورِ زیرین، هم‌مرکزِ اتاق
+    // سکوی مدور زیرین، هم‌مرکز اتاق
     R[room].add(cyl(2.25, 2.4, 0.18, '#2c3038', 0, 0.09, 0, 8, { metalness: 0.4, roughness: 0.5 }));
     R[room].add(cyl(2.05, 2.15, 0.34, '#343944', 0, 0.35, 0, 8, { metalness: 0.4, roughness: 0.45 }));
     const rim = new THREE.Mesh(new THREE.TorusGeometry(2.23, 0.025, 6, 8), std('#e5484d', { emissive: new THREE.Color('#e5484d'), emissiveIntensity: 1.6 }));
@@ -1386,7 +1389,7 @@ export function buildWorld(): World {
     rim.rotation.z = Math.PI / 8;
     rim.position.y = 0.19;
     R[room].add(rim, shadowBlob(6.0, 6.0, 0, 0, 0.9));
-    // خطوطِ نوری از سکو به چهار درِ مورّب
+    // خطوط نوری از سکو به چهار در مورب
     for (let k = 0; k < 4; k++) {
       const a = Math.PI / 4 + (k * Math.PI) / 2;
       const strip = box(2.6, 0.006, 0.05, '#e5484d', Math.cos(a) * 3.55, 0.01, Math.sin(a) * 3.55, { emissive: new THREE.Color('#e5484d'), emissiveIntensity: 0.9 });
@@ -1394,24 +1397,24 @@ export function buildWorld(): World {
       R[room].add(strip);
     }
 
-    // ── سکوی هسته: دقیقاً در مرکزِ اتاق ──
+    // ── سکوی هسته: دقیقا در مرکز اتاق ──
     const ped = new THREE.Group();
     ped.position.set(0, 0, 0);
     ped.add(cyl(0.72, 0.8, 0.12, '#2a2e36', 0, 0.58, 0, 8, { metalness: 0.5 }));
     ped.add(cyl(0.6, 0.72, 0.82, '#3a3f4a', 0, 1.05, 0, 8, { metalness: 0.5, roughness: 0.4 }));
     const TOP_Y = 1.52;
-    ped.add(cyl(0.78, 0.62, 0.1, '#2a2e36', 0, TOP_Y - 0.05, 0, 8, { metalness: 0.5 }));   // صفحهٔ بالاییِ سکو
+    ped.add(cyl(0.78, 0.62, 0.1, '#2a2e36', 0, TOP_Y - 0.05, 0, 8, { metalness: 0.5 }));   // صفحه بالایی سکو
     const band = cyl(0.62, 0.62, 0.04, '#e5484d', 0, 1.12, 0, 8, { emissive: new THREE.Color('#e5484d'), emissiveIntensity: 1.2 });
     ped.add(band);
 
-    // ── چهار سوراخِ کلید، روی چهار طرفِ سکو (نه ردیف کنارِ هم) ──
+    // ── چهار سوراخ کلید، روی چهار طرف سکو (نه ردیف کنار هم) ──
     const HOLE_R = 0.5;
     const holes: THREE.Mesh[] = [];
     const insertedKeys: THREE.Group[] = [];
     for (let i = 0; i < 4; i++) {
       const a = (i * Math.PI) / 2;                 // شمال، شرق، جنوب، غرب
       const hx = Math.cos(a) * HOLE_R, hz = Math.sin(a) * HOLE_R;
-      // نشیمنگاهِ فرورفته روی لبهٔ صفحه
+      // نشیمنگاه فرورفته روی لبه صفحه
       const seat = cyl(0.14, 0.15, 0.03, '#23272e', hx, TOP_Y + 0.005, hz, 20, { metalness: 0.6, roughness: 0.4 });
       ped.add(seat);
       const ringM = torus(0.075, 0.016, '#888', Math.PI * 2, { metalness: 0.9, roughness: 0.3 });
@@ -1422,26 +1425,26 @@ export function buildWorld(): World {
       holes.push(ringM);
       const k = keyMesh();
       k.rotation.z = -Math.PI / 2;                 // تیغه رو به پایین
-      k.rotation.y = -a;                           // حلقهٔ کلید رو به بیرونِ سکو
+      k.rotation.y = -a;                           // حلقه کلید رو به بیرون سکو
       k.position.set(hx, TOP_Y + 0.25, hz);
       k.visible = false;
       ped.add(k);
       insertedKeys.push(k);
     }
 
-    // هسته: کره + پوستهٔ سیمی که می‌چرخد، درست بالای مرکزِ سکو
+    // هسته: کره + پوسته سیمی که می‌چرخد، درست بالای مرکز سکو
     const CORE_Y = TOP_Y + 0.52;
     const core = sphere(0.2, '#e5484d', 0, CORE_Y, 0, { emissive: new THREE.Color('#e5484d'), emissiveIntensity: 1.5 });
     const shell = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3, 1), new THREE.MeshBasicMaterial({ color: '#ff8a8d', wireframe: true, transparent: true, opacity: 0.45 }));
     shell.position.copy(core.position);
     ped.add(core, shell);
-    // پایهٔ نازکِ نگه‌دارندهٔ هسته
+    // پایه نازک نگه‌دارنده هسته
     ped.add(cyl(0.05, 0.08, 0.3, '#2a2e36', 0, TOP_Y + 0.17, 0, 12, { metalness: 0.7 }));
     const coreLight = new THREE.PointLight('#ff3b3f', 2.5, 4, 2);
     coreLight.position.copy(core.position);
     ped.add(coreLight);
     R[room].add(ped);
-    register(room, 'special:FOUR_KEY_LOCK', ped, 'قفلِ چهارکلیده', CORE_Y + 0.55);
+    register(room, 'special:FOUR_KEY_LOCK', ped, 'قفل چهارکلیده', CORE_Y + 0.55);
     let coreMode: 'idle' | 'win' | 'alarm' = 'idle';
     gameData.win.needs.forEach((keyId, i) => {
       const a = (i * Math.PI) / 2;
@@ -1484,26 +1487,27 @@ export function buildWorld(): World {
       (band.material as THREE.MeshStandardMaterial).emissiveIntensity = coreMode === 'win' ? 0.05 : 1 + Math.sin(t * 2) * 0.3;
     });
 
-    // ── دریچهٔ مخفی و دکمهٔ پروتکل: روی **پهلوی** ستونِ سکو، نه روی صفحهٔ بالایی ──
-    // (صفحهٔ بالا مالِ چهار سوراخِ کلید است؛ پروتکل نباید آن را قُرق کند.)
-    const HA = Math.PI / 2;                       // رو به دوربینِ پیش‌فرضِ اتاق اصلی
+    // ── دریچه مخفی و دکمه پروتکل: روی **پهلوی** ستون سکو، نه روی صفحه بالایی ──
+    // (صفحه بالا مال چهار سوراخ کلید است؛ پروتکل نباید آن را قرق کند.)
+    const HA = Math.PI / 2;                       // رو به دوربین پیش‌فرض اتاق اصلی
     const SIDE_R = 0.6, SIDE_Y = 1.02;
-    // یک «قابِ رویه» که محورِ z محلی‌اش از ستون به بیرون می‌زند؛ همه‌چیز داخلِ آن ساخته می‌شود.
+    // یک «قاب رویه» که محور z محلی‌اش از ستون به بیرون می‌زند؛ همه‌چیز داخل آن ساخته می‌شود.
     const face = new THREE.Group();
     face.position.set(Math.cos(HA) * SIDE_R, SIDE_Y, Math.sin(HA) * SIDE_R);
     face.rotation.y = Math.PI / 2 - HA;
     ped.add(face);
 
-    // حفرهٔ تاریکِ داخلِ ستون
-    face.add(box(0.32, 0.28, 0.01, '#0a0c10', 0, 0, 0.005));
-    // قابِ فلزیِ دورِ دریچه
-    for (const [bx, by, bw, bh] of [[0, 0.165, 0.38, 0.03], [0, -0.165, 0.38, 0.03], [-0.185, 0, 0.03, 0.36], [0.185, 0, 0.03, 0.36]] as const) {
-      face.add(rbox(bw, bh, 0.02, '#2a2e36', bx, by, 0.012, { metalness: 0.6 }, 0.006));
+    // محفظه روکار: از ستون بیرون می‌زند، پس هیچ‌وقت داخلش فرو نمی‌رود
+    face.add(rbox(0.42, 0.38, 0.14, '#2a2e36', 0, 0, 0.07, { metalness: 0.6, roughness: 0.4 }, 0.02));
+    for (const [bx, by] of [[-0.17, 0.15], [0.17, 0.15], [-0.17, -0.15], [0.17, -0.15]] as const) {
+      face.add(cyl(0.013, 0.013, 0.02, '#8a9199', bx, by, 0.14, 10, { metalness: 0.85 }).rotateX(Math.PI / 2));
     }
+    // حفره تاریک داخل محفظه
+    face.add(box(0.32, 0.28, 0.01, '#0a0c10', 0, 0, 0.133));
 
-    // دکمه: صفحهٔ زرد + حلقهٔ مشکی + کلاهکِ قرمز، همه در امتدادِ z محلی
+    // دکمه: صفحه زرد + حلقه مشکی + کلاهک قرمز، همه در امتداد z محلی
     const btn = new THREE.Group();
-    btn.position.set(0, 0, 0.012);
+    btn.position.set(0, 0, 0.135);
     btn.add(cyl(0.105, 0.105, 0.014, '#ffd400', 0, 0, 0.007, 24).rotateX(Math.PI / 2));
     btn.add(cyl(0.062, 0.062, 0.018, '#222', 0, 0, 0.022, 24).rotateX(Math.PI / 2));
     const cap = cyl(0.048, 0.054, 0.042, '#ff1f1f', 0, 0, 0.05, 24, { emissive: new THREE.Color('#ff1f1f'), emissiveIntensity: 0.4, roughness: 0.3 })
@@ -1514,15 +1518,15 @@ export function buildWorld(): World {
     btn.add(tag);
     face.add(btn);
 
-    // درپوشِ لولایی روی همان رویه؛ لولا روی لبهٔ چپ
+    // درپوش لولایی روی همان رویه؛ لولا روی لبه چپ
     const hatchPivot = new THREE.Group();
-    hatchPivot.position.set(-0.185, 0, 0.026);
-    const lid = rbox(0.37, 0.33, 0.022, '#353a44', 0.185, 0, 0, { metalness: 0.55 }, 0.012);
+    hatchPivot.position.set(-0.19, 0, 0.145);
+    const lid = rbox(0.4, 0.36, 0.022, '#3d4450', 0.2, 0, 0, { metalness: 0.55 }, 0.012);
     hatchPivot.add(lid);
-    hatchPivot.add(rbox(0.05, 0.028, 0.016, '#6a7280', 0.33, 0, 0.018, { metalness: 0.8 }, 0.005));
+    hatchPivot.add(rbox(0.05, 0.028, 0.016, '#8a9199', 0.36, 0, 0.018, { metalness: 0.8 }, 0.005));
     face.add(hatchPivot);
 
-    register(room, 'special:HATCH', hatchPivot, 'درپوشِ پهلوی سکو', 0.3, (s) => !s.hatchOpen);
+    register(room, 'special:HATCH', hatchPivot, 'درپوش پهلوی سکو', 0.3, (s) => !s.hatchOpen);
     register(room, 'special:SAFETY_PROTOCOL', btn, 'CORE SAFETY PROTOCOL', 0.24, (s) => s.hatchOpen);
     syncers.push((s) => {
       anim(hatchPivot, 'ry', s.hatchOpen ? -1.55 : 0);
@@ -1533,7 +1537,7 @@ export function buildWorld(): World {
       else cap.scale.y = 1;
       (cap.material as THREE.MeshStandardMaterial).emissiveIntensity = pressed ? 2.5 : 0.4;
     });
-    // دو اسپاتِ موضعی روی سکو
+    // دو اسپات موضعی روی سکو
     for (const x of [-2.2, 2.2]) {
       const sp = new THREE.SpotLight('#ffe2b0', 11, 11, 0.5, 0.65, 1);
       sp.position.set(x, 5.2, 2.2);
