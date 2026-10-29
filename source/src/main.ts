@@ -1,11 +1,10 @@
 import './styles/main.css';
 
 import { gameData, puzzleById, keyById, coinById, clueById, roomById, doorById, type RoomId } from './data/game-data';
-import { setLang, getLang, t } from './data/i18n';
+import { setLang, t } from './data/i18n';
 import { GameState, type Mode } from './game/GameState';
 import { interactDoor, sideFor } from './game/DoorLogic';
 import { collectKey, findCoin, insertKeys, openHatch, pressProtocol, skip, type SubmitResult } from './game/PuzzleController';
-import { loadLang, saveLang } from './game/Settings';
 import { sound } from './game/Sound';
 import { Stage } from './engine/Scene';
 import type { Interactable } from './engine/Rooms';
@@ -16,12 +15,11 @@ import { openGuide } from './ui/GuideCard';
 import { Hud } from './ui/Hud';
 import { showIntro, hideIntro } from './ui/Intro';
 import { showEnd } from './ui/EndScreen';
-import { openRoutes } from './ui/RoutesPanel';
 import { settingsForm } from './ui/SettingsForm';
 import { puzzleImage, canvasImage } from './ui/PuzzleImage';
 import { blackboardCanvas, adsCanvas, liarCanvas, noteCanvas, loadCanvasFonts } from './engine/textures';
 
-setLang(loadLang());
+setLang();
 const state = new GameState();
 
 // صحنه بعد از لودِ فونت‌ها ساخته می‌شود تا نوشته‌های کانواسیِ دیوارها با Paradox کشیده شوند.
@@ -31,9 +29,9 @@ const roomName = (r: RoomId) => roomById(r).title;
 
 // ───────── ناوبری ─────────
 function goToRoom(room: RoomId) {
+  // راهنما: پرشِ آزادِ دوربین، بدونِ جابه‌جا کردنِ هم‌تیمی‌ها (وگرنه چیدمانِ تیم خراب می‌شود)
   if (state.mode === 'guide') {
-    // free-roam: هم‌تیمیِ فعال به آن اتاق می‌پرد
-    if (!state.selectOpIn(room)) state.moveActive(room);
+    state.selectOpIn(room);
     stage.enterRoom(room);
     return;
   }
@@ -46,7 +44,8 @@ function goToRoom(room: RoomId) {
 
 function moveTo(to: RoomId) {
   sound.door();
-  state.moveActive(to);
+  // فقط در حالت بازی کسی واقعاً از در رد می‌شود؛ در حالت راهنما دوربین تنها می‌رود.
+  if (state.mode === 'play') state.moveActive(to);
   stage.enterRoom(to);
   toast(`→ ${roomName(to)}`, 'info', 1800);
 }
@@ -107,7 +106,11 @@ function showPuzzleClue(id: string) {
 function interact(it: Interactable) {
   const [kind, id] = it.id.split(':') as [string, string];
   const room = state.view!;
-  if (state.room !== room) state.moveActive(room);
+  // در حالت بازی، تعامل فقط از طرفِ هم‌تیمی‌ای که واقعاً در این اتاق است ممکن است.
+  // (قبلاً هر کلیکی هم‌تیمیِ فعال را به اتاقِ دیده‌شده می‌کشاند و چیدمانِ تیم خراب می‌شد.)
+  if (state.mode === 'play' && state.room !== room && !state.selectOpIn(room)) {
+    return toast(t('noOperativeHere'), 'info');
+  }
 
   // هر چیزی که پنل باز می‌کند یا انیمیشن دارد، دوربین را رویش می‌برد (درها جدا رسیدگی می‌شوند).
   if (kind !== 'door' && kind !== 'prop' && id !== 'SAFETY_PROTOCOL') stage.focusOn(it, kind === 'special' ? 3400 : 2600);
@@ -219,14 +222,6 @@ function openSettings() {
   openPanel(t('settings'), settingsForm(), { kicker: t('chatConfig') });
 }
 
-function toggleLang() {
-  const next = getLang() === 'fa' ? 'en' : 'fa';
-  setLang(next);
-  saveLang(next);
-  if (!document.getElementById('intro')!.hidden) showIntro(start, toggleLang);
-  state.emit();
-}
-
 let lastOutcome = state.outcome;
 state.on(() => {
   if (state.outcome && state.outcome !== lastOutcome) {
@@ -250,14 +245,9 @@ const hud = new Hud(state, {
     closePanel();
     stage.overview();
   },
-  routes: () => openRoutes(state),
   settings: openSettings,
-  lang: toggleLang,
   restart: () => restart(),
-  selectOp: (i) => {
-    state.selectOp(i);
-    stage.enterRoom(state.ops[i].room);
-  },
+  goRoom: (room) => goToRoom(room),
 });
 
 function start(mode: Mode) {
@@ -265,19 +255,14 @@ function start(mode: Mode) {
   hideIntro();
   hud.render();
   sound.click();
-  if (mode === 'guide') {
-    stage.overview();
-    toast(t('guideLegend'), 'info', 5000);
-  } else {
-    stage.enterRoom(state.room);
-    toast(`${t('operative')} ${state.active.name} — ${roomName(state.room)}`, 'info', 3000);
-  }
+  stage.enterRoom(state.room);
+  toast(`${t('operative')} ${state.active.name} — ${roomName(state.room)}`, 'info', 3000);
 }
 
 function restart() {
   closePanel();
   stage.overview();
-  showIntro(start, toggleLang);
+  showIntro(start);
 }
 
 async function boot() {
@@ -307,7 +292,7 @@ async function boot() {
   });
 
   document.getElementById('hud')!.hidden = true;
-  showIntro(start, toggleLang);
+  showIntro(start);
   // دسترسی برای دیباگ و تست‌های دستی در کنسول
   Object.assign(window, { __ffk: { state, stage, interact } });
 }

@@ -111,7 +111,8 @@ export class Stage {
       lbl.visible = !v;
       const ops = this.state.opsIn(room as RoomId);
       const span = lbl.element.querySelector('span');
-      if (span) span.textContent = ops.length ? '👤'.repeat(ops.length) : '';
+      // بدونِ ایموجی (درخواستِ کاربر): فقط شمارهٔ هم‌تیمی‌های داخلِ اتاق
+      if (span) span.textContent = ops.map((o) => o.name).join(' ');
       lbl.element.classList.toggle('active', this.state.room === room);
     }
   }

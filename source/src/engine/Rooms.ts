@@ -399,7 +399,7 @@ export function buildWorld(): World {
           ? ([[0.06 * S, 0.12 * S], [WALL_H - 0.03 * S, 0.06 * S]] as const)
           : ([[WALL_H - 0.03 * S, 0.06 * S]] as const)) {
           const trim = new THREE.Mesh(new THREE.BoxGeometry(s1 - s0, hh, WALL_T * 1.3), std(trimColor, { transparent: true }));
-          trim.position.set(m.position.x, yy, m.position.z);
+          trim.position.set(m.position.x, yy, m.position.z).addScaledVector(nrm, -WALL_T * 0.15);
           trim.rotation.y = ang;
           trim.userData.normal = nrm;
           g.add(trim);
@@ -535,9 +535,13 @@ export function buildWorld(): World {
   for (const [room, at] of Object.entries(VENT_AT) as [RoomId, [number, number]][]) {
     const [cx, cz] = CENTERS[room];
     const n = new THREE.Vector3(-at[0], 0, -at[1]).normalize();   // رو به مرکزِ نقشه
+    const ang = Math.atan2(-n.x, -n.z);       // +z رو به داخلِ همین اتاق
+    // بالای D25 قفلِ چرخشیِ مرتفع نشسته، پس داکتِ اتاق ۲ کنار می‌رود تا رویش نیفتد
+    const slide = room === 'room2' ? 0.95 : 0;
+    const along = new THREE.Vector3(Math.cos(ang), 0, -Math.sin(ang));
     const dg = new THREE.Group();
-    dg.position.set(at[0], DOOR_H + 0.34 * S, at[1]);
-    dg.rotation.y = Math.atan2(-n.x, -n.z);   // +z رو به داخلِ همین اتاق
+    dg.position.set(at[0], DOOR_H + 0.34 * S, at[1]).addScaledVector(along, slide);
+    dg.rotation.y = ang;
     root.add(dg);
 
     // داکتِ فلزی که از دیوار بیرون زده
@@ -887,12 +891,14 @@ export function buildWorld(): World {
     // فرش با حاشیه (از گوشهٔ هشت‌ضلعی دور شد)
     const rug = new THREE.Mesh(new THREE.CircleGeometry(1.25, 48), std('#c0392b', { roughness: 1 }));
     rug.rotation.x = -Math.PI / 2;
-    rug.position.set(-1.0, 0.012, 1.1);
+    rug.position.set(-1.0, 0.03, 1.1);
+    rug.renderOrder = 2;
     R[room].add(rug);
     for (const [r0, r1, c] of [[1.02, 1.12, '#f1c40f'], [0.44, 0.52, '#f1c40f']] as const) {
       const ring = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 48), std(c, { roughness: 1 }));
       ring.rotation.x = -Math.PI / 2;
-      ring.position.set(-1.0, 0.014, 1.1);
+      ring.position.set(-1.0, 0.055, 1.1);
+      ring.renderOrder = 3;
       R[room].add(ring);
     }
     // پُف (بین‌بگ)
@@ -978,20 +984,41 @@ export function buildWorld(): World {
     shelf.add(rbox(0.3, 0.22, 0.28, '#4d5764', 0.48, 1.78, 0.02, { roughness: 0.8 }, 0.02));
     R[room].add(shelf, shadowBlob(1.8, 0.8, 4.1, -4.4, 0.6));
 
-    // قطعاتِ اسکرابل — روی طبقهٔ وسطِ قفسه
+    // قطعاتِ اسکرابل — خودِ تصویرِ تیم (fig-scrabble.jpg) روی طبقهٔ وسطِ قفسه
     const tiles = new THREE.Group();
-    tiles.position.set(3.85, SHELF_Y[1] + 0.05, -4.32);
-    'INSRTHME'.split('').forEach((ch, i) => {
-      const tl = rbox(0.13, 0.03, 0.13, '#f3e2b3', (i % 4) * 0.16 - 0.24, 0.015, Math.floor(i / 4) * 0.16 - 0.08, { roughness: 0.6 }, 0.01);
-      tl.rotation.y = ((i * 37) % 10 - 5) * 0.04;
-      const face = plane(0.11, 0.11, textTexture([ch], { bg: '#f3e2b3', fg: '#222', size: 160, w: 256, h: 256, dir: 'ltr' }));
-      face.rotation.x = -Math.PI / 2;
-      face.position.y = 0.0155;
-      tl.add(face);
-      tiles.add(tl);
-    });
+    tiles.position.set(3.95, SHELF_Y[1] + 0.035, -4.45);
+    const scrabbleAsset = puzzleById('P24b')!.asset!;
+    const sheet = plane(0.46, 0.46, assetTexture(scrabbleAsset, () => {
+      // تا وقتی فایلِ تیم نیست: همان چیدمانِ حرف‌ها روی کاشی‌های کرم‌رنگ
+      const c = document.createElement('canvas');
+      c.width = c.height = 512;
+      const g = c.getContext('2d')!;
+      g.fillStyle = '#3b2f2a';
+      g.fillRect(0, 0, 512, 512);
+      ['INSERT', 'HOME', 'END', 'ENTER'].forEach((w, row) => {
+        w.split('').forEach((ch, i) => {
+          const x = 24 + i * 72 + (row % 2) * 16, y = 30 + row * 118;
+          g.save();
+          g.translate(x + 32, y + 36);
+          g.rotate((((i * 7 + row * 3) % 9) - 4) * 0.02);
+          g.fillStyle = '#f3e2b3';
+          g.fillRect(-32, -36, 64, 72);
+          g.fillStyle = '#222';
+          g.font = '44px Georgia, serif';
+          g.textAlign = 'center';
+          g.direction = 'ltr';
+          g.fillText(ch, 0, 16);
+          g.restore();
+        });
+      });
+      return c;
+    }, 'contain', '#3b2f2a'));
+    sheet.rotation.x = -Math.PI / 2;
+    sheet.position.y = 0.004;
+    tiles.add(rbox(0.5, 0.02, 0.5, '#2c333c', 0, -0.008, 0, { roughness: 0.6 }, 0.01));
+    tiles.add(sheet);
     R[room].add(tiles);
-    register(room, 'puzzle:P24b', tiles, 'قطعاتِ اسکرابل', 0.6);
+    register(room, 'puzzle:P24b', tiles, 'قطعاتِ اسکرابل', 0.55);
     // کاغذِ زیرِ میز
     const paper = box(0.35, 0.005, 0.25, '#fff7a8', 1.0, 0.75, 1.95, { roughness: 0.9 });
     paper.rotation.y = 0.15;
@@ -1120,17 +1147,21 @@ export function buildWorld(): World {
     });
     // فرش + سکهٔ ۶۴ (از گوشهٔ هشت‌ضلعی دور شد)
     const RUG: [number, number] = [-1.6, -2.6];
-    const rug = rbox(3.4, 0.02, 2.4, '#7a2c8f', RUG[0], 0.012, RUG[1], { roughness: 1 }, 0.008);
+    const rug = rbox(3.4, 0.05, 2.4, '#7a2c8f', RUG[0], 0.025, RUG[1], { roughness: 1 }, 0.008);
     R[room].add(rug);
-    for (const [w, d, c] of [[3.1, 2.1, '#a64ac9'], [2.9, 1.9, '#7a2c8f']] as const) R[room].add(box(w, 0.004, d, c, RUG[0], 0.024, RUG[1], { roughness: 1 }));
+    [[3.1, 2.1, '#a64ac9'], [2.9, 1.9, '#7a2c8f']].forEach(([w, d, c], i) => {
+      const layer = box(w as number, 0.01, d as number, c as string, RUG[0], 0.055 + i * 0.016, RUG[1], { roughness: 1 });
+      layer.renderOrder = 2 + i;
+      R[room].add(layer);
+    });
     const corner = new THREE.Group();
-    corner.position.set(RUG[0] + 1.7, 0.025, RUG[1] + 1.2);
+    corner.position.set(RUG[0] + 1.7, 0.075, RUG[1] + 1.2);
     const flap = box(0.5, 0.02, 0.5, '#7a2c8f', -0.25, 0, -0.25, { roughness: 1 });
     corner.add(flap);
     corner.rotation.y = Math.PI / 4;
     R[room].add(corner);
     const coin64 = coinMesh('64');
-    coin64.position.set(RUG[0] + 1.45, 0.02, RUG[1] + 1.0);
+    coin64.position.set(RUG[0] + 1.45, 0.045, RUG[1] + 1.0);
     R[room].add(coin64);
     register(room, 'coin:coin64', corner, 'گوشهٔ تاخوردهٔ فرش', 0.6);
     onChange((s) => s.coinsFound.has('coin64'), (found, animate) => {
@@ -1453,40 +1484,48 @@ export function buildWorld(): World {
       (band.material as THREE.MeshStandardMaterial).emissiveIntensity = coreMode === 'win' ? 0.05 : 1 + Math.sin(t * 2) * 0.3;
     });
 
-    // ── دریچهٔ مخفی و دکمهٔ پروتکل: روی خودِ صفحهٔ سکو، زیرِ هسته (نه روی زمین) ──
-    // بین دو سوراخِ کلید، روی قطرِ ۴۵ درجه می‌نشیند تا سوراخ‌ها را نپوشاند.
-    const HA = Math.PI / 4;
-    const HATCH_R = 0.3, LID = 0.28;
-    const hatchAt = new THREE.Vector3(Math.cos(HA) * HATCH_R, TOP_Y + 0.01, Math.sin(HA) * HATCH_R);
-    const hatchPivot = new THREE.Group();
-    hatchPivot.position.copy(hatchAt);
-    hatchPivot.rotation.y = -HA;
-    const lid = rbox(LID, 0.022, 0.22, '#353a44', LID / 2, 0, 0, { metalness: 0.55 }, 0.01);
-    hatchPivot.add(lid);
-    hatchPivot.add(rbox(0.06, 0.013, 0.026, '#6a7280', LID - 0.04, 0.018, 0, { metalness: 0.8 }, 0.005));
-    ped.add(hatchPivot);
-    // حفرهٔ زیرِ درپوش
-    const btnAt = new THREE.Vector3(hatchAt.x + Math.cos(HA) * LID / 2, 0, hatchAt.z + Math.sin(HA) * LID / 2);
-    const well = cyl(0.14, 0.14, 0.07, '#0a0c10', btnAt.x, TOP_Y - 0.03, btnAt.z, 20);
-    ped.add(well);
-    register(room, 'special:HATCH', hatchPivot, 'درپوشِ کوچکِ روی سکو', 0.3, (s) => !s.hatchOpen);
+    // ── دریچهٔ مخفی و دکمهٔ پروتکل: روی **پهلوی** ستونِ سکو، نه روی صفحهٔ بالایی ──
+    // (صفحهٔ بالا مالِ چهار سوراخِ کلید است؛ پروتکل نباید آن را قُرق کند.)
+    const HA = Math.PI / 2;                       // رو به دوربینِ پیش‌فرضِ اتاق اصلی
+    const SIDE_R = 0.6, SIDE_Y = 1.02;
+    // یک «قابِ رویه» که محورِ z محلی‌اش از ستون به بیرون می‌زند؛ همه‌چیز داخلِ آن ساخته می‌شود.
+    const face = new THREE.Group();
+    face.position.set(Math.cos(HA) * SIDE_R, SIDE_Y, Math.sin(HA) * SIDE_R);
+    face.rotation.y = Math.PI / 2 - HA;
+    ped.add(face);
 
+    // حفرهٔ تاریکِ داخلِ ستون
+    face.add(box(0.32, 0.28, 0.01, '#0a0c10', 0, 0, 0.005));
+    // قابِ فلزیِ دورِ دریچه
+    for (const [bx, by, bw, bh] of [[0, 0.165, 0.38, 0.03], [0, -0.165, 0.38, 0.03], [-0.185, 0, 0.03, 0.36], [0.185, 0, 0.03, 0.36]] as const) {
+      face.add(rbox(bw, bh, 0.02, '#2a2e36', bx, by, 0.012, { metalness: 0.6 }, 0.006));
+    }
+
+    // دکمه: صفحهٔ زرد + حلقهٔ مشکی + کلاهکِ قرمز، همه در امتدادِ z محلی
     const btn = new THREE.Group();
-    btn.position.set(btnAt.x, TOP_Y - 0.02, btnAt.z);
-    btn.rotation.y = -HA;
-    btn.add(cyl(0.128, 0.128, 0.018, '#ffd400', 0, 0, 0, 24));
-    btn.add(cyl(0.072, 0.072, 0.022, '#222', 0, 0.018, 0, 24));
-    const cap = cyl(0.056, 0.062, 0.05, '#ff1f1f', 0, 0.045, 0, 24, { emissive: new THREE.Color('#ff1f1f'), emissiveIntensity: 0.4, roughness: 0.3 });
+    btn.position.set(0, 0, 0.012);
+    btn.add(cyl(0.105, 0.105, 0.014, '#ffd400', 0, 0, 0.007, 24).rotateX(Math.PI / 2));
+    btn.add(cyl(0.062, 0.062, 0.018, '#222', 0, 0, 0.022, 24).rotateX(Math.PI / 2));
+    const cap = cyl(0.048, 0.054, 0.042, '#ff1f1f', 0, 0, 0.05, 24, { emissive: new THREE.Color('#ff1f1f'), emissiveIntensity: 0.4, roughness: 0.3 })
+      .rotateX(Math.PI / 2);
     btn.add(cap);
-    const tag = plane(0.25, 0.046, textTexture(['CORE SAFETY PROTOCOL'], { bg: '#ffd400', fg: '#000', size: 30, w: 512, h: 112, dir: 'ltr' }));
-    tag.rotation.x = -Math.PI / 2;
-    tag.position.set(0, 0.011, 0.086);
+    const tag = plane(0.2, 0.036, textTexture(['CORE SAFETY PROTOCOL'], { bg: '#ffd400', fg: '#000', size: 30, w: 512, h: 112, dir: 'ltr' }));
+    tag.position.set(0, -0.078, 0.009);
     btn.add(tag);
-    ped.add(btn);
-    register(room, 'special:SAFETY_PROTOCOL', btn, 'CORE SAFETY PROTOCOL', 0.26, (s) => s.hatchOpen);
+    face.add(btn);
+
+    // درپوشِ لولایی روی همان رویه؛ لولا روی لبهٔ چپ
+    const hatchPivot = new THREE.Group();
+    hatchPivot.position.set(-0.185, 0, 0.026);
+    const lid = rbox(0.37, 0.33, 0.022, '#353a44', 0.185, 0, 0, { metalness: 0.55 }, 0.012);
+    hatchPivot.add(lid);
+    hatchPivot.add(rbox(0.05, 0.028, 0.016, '#6a7280', 0.33, 0, 0.018, { metalness: 0.8 }, 0.005));
+    face.add(hatchPivot);
+
+    register(room, 'special:HATCH', hatchPivot, 'درپوشِ پهلوی سکو', 0.3, (s) => !s.hatchOpen);
+    register(room, 'special:SAFETY_PROTOCOL', btn, 'CORE SAFETY PROTOCOL', 0.24, (s) => s.hatchOpen);
     syncers.push((s) => {
-      anim(hatchPivot, 'rz', s.hatchOpen ? -2.1 : 0);
-      anim(btn, 'py', s.hatchOpen ? TOP_Y + 0.02 : TOP_Y - 0.06);
+      anim(hatchPivot, 'ry', s.hatchOpen ? -1.55 : 0);
       btn.visible = s.hatchOpen;
     });
     onChange((s) => s.protocolPressed, (pressed, animate) => {

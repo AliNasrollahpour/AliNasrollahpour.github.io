@@ -1,18 +1,16 @@
 ﻿// HUD بالا (حالت، زمان، کلیدها، درها، تیم، دکمه‌ها) و سرتیترِ اتاقِ فعلی.
 import { h, put } from './dom';
 import { t } from '../data/i18n';
-import { gameData, roomById } from '../data/game-data';
+import { gameData, roomById, type RoomId } from '../data/game-data';
 import type { GameState } from '../game/GameState';
 
 export interface HudActions {
   toggleMode: () => void;
   toggleTimer: () => void;
   map: () => void;
-  routes: () => void;
   settings: () => void;
-  lang: () => void;
   restart: () => void;
-  selectOp: (idx: number) => void;
+  goRoom: (room: RoomId) => void;
 }
 
 const fmt = (ms: number) => {
@@ -45,13 +43,22 @@ export class Hud {
       ...gameData.win.needs.map((k) => h('span', { class: `k${s.keysInserted.has(k) ? ' in' : s.keysFound.has(k) ? ' found' : ''}` }, '🗝')),
       h('b', {}, `${s.keysFound.size}/${gameData.win.needs.length}`));
     const doors = h('div', { class: 'hud-doors', title: 'درهای باز' }, '🚪 ', h('b', {}, `${s.openEdges.size}/${gameData.doors.length}`));
+    // هر پنج اتاق در نوارِ بالا؛ عددِ روی دکمه = تعدادِ هم‌تیمی‌های داخلِ آن اتاق
     const team = h('div', { class: 'hud-team', role: 'group', 'aria-label': t('team') },
-      ...s.ops.map((op, i) => h('button', {
-        class: `op${i === s.activeOp ? ' on' : ''}`,
-        style: `--c:${roomById(op.room).palette.accent}`,
-        title: `${t('operative')} ${op.name} — ${roomById(op.room).title}`,
-        onclick: () => a.selectOp(i),
-      }, h('b', {}, op.name), h('small', {}, roomById(op.room).title.split('—')[0].trim()))));
+      ...gameData.rooms.map((r) => {
+        const here = s.opsIn(r.id);
+        const reachable = s.mode === 'guide' || here.length > 0;
+        return h('button', {
+          class: `op${s.view === r.id ? ' on' : ''}${reachable ? '' : ' off'}`,
+          style: `--c:${r.palette.accent}`,
+          title: here.length
+            ? `${r.title} — ${here.map((o) => o.name).join('، ')}`
+            : `${r.title} — ${t('noOperativeHere')}`,
+          onclick: () => a.goRoom(r.id),
+        },
+        h('b', {}, here.length ? here.map((o) => o.name).join('·') : '—'),
+        h('small', {}, r.title.split('—')[0].trim()));
+      }));
     this.tick();
     this.root.append(
       h('div', { class: 'hud-left' },
@@ -64,9 +71,7 @@ export class Hud {
       team,
       h('div', { class: 'hud-right' },
         h('button', { class: 'icon-btn', title: t('map'), onclick: a.map }, '🗺'),
-        h('button', { class: 'icon-btn', title: t('routes'), onclick: a.routes }, '🧭'),
         h('button', { class: 'icon-btn', title: t('settings'), onclick: a.settings }, '⚙'),
-        h('button', { class: 'icon-btn txt', title: 'Language', onclick: a.lang }, t('language')),
         h('button', { class: 'icon-btn', title: t('restart'), onclick: a.restart }, '↺')),
     );
 

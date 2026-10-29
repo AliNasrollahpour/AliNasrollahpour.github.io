@@ -211,11 +211,31 @@ describe('چیدمانِ نسخهٔ جدید', () => {
     expect(counts.reduce((a, b) => a + b, 0)).toBe(Number(puzzleById('P45b')!.solution));
   });
 
-  it('کاغذِ اتاق ۳ متناقض است ولی اسمِ مگ‌لاک در آن آمده', () => {
+  it('معمای کاغذِ اتاق ۳ جوابِ یکتا دارد و همان جوابِ مگ‌لاکِ D35 است', () => {
     const note = gameData.clues.find((c) => c.id === 'C3note')!;
     expect(note.roomId).toBe('room3');
-    expect(note.text).toContain('کامران');
-    expect(normalize(note.text)).toContain(normalize(String(puzzleById('D35')!.solution)));
+    expect(note.text).toContain('۲ عبارت دروغ است و ۵ عبارت راست است');
+
+    // هفت گزارهٔ کاغذ، روی یک ترتیبِ دلخواه از چهار نفر
+    const PEOPLE = ['مینا', 'رضا', 'سارا', 'کامران'];
+    const at = (o: string[], n: string) => o.indexOf(n);
+    const CLAIMS: ((o: string[]) => boolean)[] = [
+      (o) => at(o, 'مینا') < at(o, 'رضا'),
+      (o) => at(o, 'رضا') < at(o, 'سارا'),
+      (o) => at(o, 'سارا') !== o.length - 1,
+      (o) => at(o, 'رضا') === at(o, 'مینا') + 1,
+      (o) => at(o, 'رضا') === at(o, 'سارا') + 1,
+      (o) => at(o, 'سارا') === at(o, 'کامران') + 1,
+      (o) => at(o, 'کامران') === at(o, 'سارا') + 1,
+    ];
+    const perms = (xs: string[]): string[][] =>
+      xs.length <= 1 ? [xs] : xs.flatMap((x, i) => perms([...xs.slice(0, i), ...xs.slice(i + 1)]).map((r) => [x, ...r]));
+
+    const solutions = perms(PEOPLE).filter((o) => CLAIMS.filter((c) => c(o)).length === 5);
+    expect(solutions).toHaveLength(1);                       // دقیقاً یک چیدمان
+    expect(solutions[0]).toEqual(['مینا', 'رضا', 'سارا', 'کامران']);
+    const last = solutions[0][solutions[0].length - 1];
+    expect(normalize(last)).toBe(normalize(String(puzzleById('D35')!.solution)));
   });
 
   it('هیچ‌جای محتوا به میکروفون یا بلند گفتن اشاره نمی‌کند', () => {

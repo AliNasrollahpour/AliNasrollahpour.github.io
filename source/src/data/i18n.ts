@@ -1,10 +1,13 @@
 // رشته‌های رابط. محتوای روایی (معماها، نیتِ طراحی) در game-data به فارسی است.
-export type Lang = 'fa' | 'en';
+/** رابط فقط فارسی است (درخواستِ کاربر: گزینهٔ انگلیسی حذف شد). */
+export type Lang = 'fa';
 
 const fa = {
   appTitle: 'Fight for Knowledge',
   appSubtitle: 'حلقه انسانی — نسخهٔ دیجیتال برای داوران',
   briefingTitle: 'پیامِ مأموریت',
+  start: 'شروع',
+  startHint: 'بعد از شروع، از نوارِ بالا بینِ حالتِ بازی و راهنما جابه‌جا شو.',
   chatConfig: 'پیکربندیِ چتِ ایجنت‌ها',
   chatConfigHint: 'کلید فقط در مرورگرِ شما (localStorage) ذخیره و فقط به providerِ انتخابی فرستاده می‌شود. بدون کلید هم همه‌چیز به‌جز چتِ زنده کار می‌کند.',
   provider: 'Provider',
@@ -12,15 +15,10 @@ const fa = {
   model: 'Model',
   apiKey: 'API Key',
   apiKeyPlaceholder: 'کلیدِ خودتان را وارد کنید',
-  startGuide: 'شروعِ تورِ داور',
-  startGuideHint: 'جواب‌ها و نیتِ طراحی روی صحنه؛ پرش آزاد بین اتاق‌ها',
-  startPlay: 'ورود به بازی',
-  startPlayHint: 'تیمِ چهارنفره، بدونِ راهنما، با گیتینگِ کامل',
   modePlay: 'بازی',
   modeGuide: 'راهنما',
   keys: 'کلیدها',
   map: 'نقشه',
-  routes: 'مسیرهای برد',
   settings: 'تنظیمات',
   timer: 'زمان',
   timerPause: 'توقفِ زمان',
@@ -62,7 +60,6 @@ const fa = {
   backToMap: 'بازگشت به نقشه',
   clickToEnter: 'برای ورود کلیک کن',
   noOperativeHere: 'هیچ‌کدام از هم‌تیمی‌ها در این اتاق نیست. فقط از راهِ درها می‌شود رسید.',
-  language: 'EN',
   save: 'ذخیره',
   saved: 'ذخیره شد',
   guideLegend: 'روی نشانِ ⓘ کلیک کن تا جواب و نیتِ طراحی را ببینی.',
@@ -70,80 +67,12 @@ const fa = {
 
 type Strings = typeof fa;
 
-const en: Strings = {
-  appTitle: 'Fight for Knowledge',
-  appSubtitle: 'The Human Circle — digital edition for judges',
-  briefingTitle: 'Mission briefing',
-  chatConfig: 'Agent chat configuration',
-  chatConfigHint: 'Your key is stored only in this browser (localStorage) and sent only to the selected provider. Everything except live chat works without a key.',
-  provider: 'Provider',
-  baseUrl: 'Base URL',
-  model: 'Model',
-  apiKey: 'API Key',
-  apiKeyPlaceholder: 'Enter your own key',
-  startGuide: 'Start judge tour',
-  startGuideHint: 'Answers and design intent on the scene; free roam',
-  startPlay: 'Enter the game',
-  startPlayHint: 'Four-person team, no hints, full gating',
-  modePlay: 'Play',
-  modeGuide: 'Guide',
-  keys: 'Keys',
-  map: 'Map',
-  routes: 'Win routes',
-  settings: 'Settings',
-  timer: 'Time',
-  timerPause: 'Pause timer',
-  timerResume: 'Resume timer',
-  team: 'Team',
-  operative: 'Operative',
-  inRoom: 'in',
-  close: 'Close',
-  submit: 'Try',
-  reset: 'Clear',
-  enter: 'Enter',
-  revealSkip: 'Open (skip puzzle)',
-  answer: 'Answer',
-  why: 'Why',
-  designNote: 'Design / narrative intent',
-  lockType: 'Lock type',
-  solved: 'Solved',
-  wrong: 'No. Try again.',
-  wrongSide: 'This door does not open from this side.',
-  oneWay: 'This passage cannot be entered from this side.',
-  locked: 'Locked.',
-  chatSend: 'Send',
-  chatPlaceholder: 'Type a message…',
-  chatNoKey: 'Enter an API key in Settings for live chat. Sample dialogues are in the persona panel.',
-  chatError: 'Connection failed',
-  personaPanel: 'Persona, motive and crack',
-  starters: 'Suggested openers',
-  samples: 'Sample dialogue (offline)',
-  devanAttempts: 'Attempts left',
-  giveCoin: 'Give coin',
-  winTitle: 'The core is down',
-  winText: 'Four keys turned in the platform lock. The servers fell silent one by one — and for the first time in years, the room held only human breathing.',
-  loseProtocolTitle: 'Safety protocol activated',
-  loseProtocolText: 'The core protected itself. The four-key lock went dark forever and the doors locked one by one. The machine thanked you — kindly.',
-  loseTimerTitle: 'Time is up',
-  loseTimerText: '120 minutes passed. The core updated itself and the Human Circle was locked out for good.',
-  restart: 'Restart',
-  keepExploring: 'Keep exploring',
-  backToMap: 'Back to map',
-  clickToEnter: 'Click to enter',
-  noOperativeHere: 'None of your teammates is in this room. It can only be reached through doors.',
-  language: 'فا',
-  save: 'Save',
-  saved: 'Saved',
-  guideLegend: 'Click an ⓘ badge to see the answer and design intent.',
-};
+const tables: Record<Lang, Strings> = { fa };
+const current: Lang = 'fa';
 
-const tables: Record<Lang, Strings> = { fa, en };
-let current: Lang = 'fa';
-
-export function setLang(lang: Lang) {
-  current = lang;
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+export function setLang(_lang: Lang = 'fa') {
+  document.documentElement.lang = 'fa';
+  document.documentElement.dir = 'rtl';
 }
 export const getLang = () => current;
 export const t = (key: keyof Strings) => tables[current][key];

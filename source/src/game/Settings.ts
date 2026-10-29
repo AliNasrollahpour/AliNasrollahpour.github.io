@@ -1,5 +1,4 @@
 // پیکربندیِ چت و زبان در localStorage — همیشه با try/catch (حالت خصوصی، Pages، پیش‌نمایش).
-import type { Lang } from '../data/i18n';
 
 export interface ChatSettings {
   provider: string;
@@ -23,7 +22,6 @@ export const DEFAULT_SETTINGS: ChatSettings = {
 };
 
 const KEY = 'ffk3d.chat';
-const LANG_KEY = 'ffk3d.lang';
 
 export function loadSettings(): ChatSettings {
   try {
@@ -38,24 +36,6 @@ export function loadSettings(): ChatSettings {
 export function saveSettings(s: ChatSettings) {
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
-  } catch {
-    /* نادیده */
-  }
-}
-
-export function loadLang(): Lang {
-  try {
-    const v = localStorage.getItem(LANG_KEY);
-    if (v === 'fa' || v === 'en') return v;
-  } catch {
-    /* نادیده */
-  }
-  return 'fa';
-}
-
-export function saveLang(lang: Lang) {
-  try {
-    localStorage.setItem(LANG_KEY, lang);
   } catch {
     /* نادیده */
   }

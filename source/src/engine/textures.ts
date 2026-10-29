@@ -444,13 +444,13 @@ export function mazeCanvas(size = 512) {
   return c;
 }
 
-export const P41_SECTIONS: { title: string; note?: string; items: [string, string, string, string] }[] = [
+export const P41_SECTIONS: { title: string; text?: string[]; items: [string, string, string, string] }[] = [
   // ترتیبِ items: بالا، راست، پایین، چپ — یعنی راس‌های لوزی
   { title: '۱', items: ['NH₃', 'KCl', 'CuSO₂', 'H₂O'] },
   { title: '۲', items: ['Maxwell', 'Faraday', 'Turing', 'Kirchhoff'] },
   { title: '۳', items: ['', '', '', ''] },
-  // قطب‌نمایی که جنوبش رو به بالاست: «راست»ِ این صفحه در واقع غرب است
-  { title: '۴', note: '«راست» کدام جهت است؟', items: ['جنوب', 'غرب', 'شمال', 'شرق'] },
+  // بخشِ ۴ همان ساختارِ اولِ خودش است: یک پرسشِ متنی، بدونِ لوزی و بدونِ فلش
+  { title: '۴', text: ['جنوبِ صفحه رو به بالاست.', '«راست» کدام جهت است؟'], items: ['', '', '', ''] },
 ];
 
 /**
@@ -480,10 +480,11 @@ export function p41PosterCanvas() {
     g.direction = 'rtl';
     g.font = fontOf(true, 40);
     g.fillText(sec.title, ox + W / 4, oy + 52);
-    if (sec.note) {
-      g.fillStyle = '#5b7391';
-      g.font = fontOf(true, 26);
-      g.fillText(sec.note, ox + W / 4, oy + 92);
+    if (sec.text) {
+      g.fillStyle = '#1e3a5f';
+      g.font = fontOf(true, 34);
+      sec.text.forEach((l, k) => g.fillText(l, ox + W / 4, cy - 10 + k * 56));
+      return;
     }
     if (i === 2) return; // بخشِ هزارتو جداگانه کشیده می‌شود
     const rx = W / 4 - 70, ry = H / 4 - 92;

@@ -90,6 +90,9 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 }
 .hud-team .op small { font-size: 10px; color: var(--muted); white-space: nowrap; }
 .hud-team .op.on { background: var(--panel-2); outline: 2px solid var(--c); }
+/* اتاقی که هیچ هم‌تیمی‌ای در آن نیست (فقط در حالت بازی) */
+.hud-team .op.off { opacity: 0.45; }
+.hud-team .op b { min-height: 1.1em; }
 .icon-btn {
   width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel);
   cursor: pointer; font-size: 16px; display: inline-grid; place-items: center;
@@ -226,17 +229,7 @@ code { font-family: ui-monospace, Consolas, monospace; background: #0003; paddin
 .chat-compose { display: flex; gap: 8px; align-items: flex-end; }
 .chat-input { resize: none; flex: 1; }
 
-/* ───────── مسیرها ───────── */
-.routes .route { margin-bottom: 18px; }
-.routes h3 { font-size: 15px; margin: 8px 0; }
-.routes ol { padding-inline-start: 20px; margin: 8px 0; }
-.routes li { margin-bottom: 6px; line-height: 1.8; font-size: 14px; }
 .room-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; }
-.minimap { background: var(--bg); border-radius: 10px; padding: 6px; }
-.minimap svg { width: 100%; max-height: 220px; display: block; }
-.doors-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.doors-table th, .doors-table td { text-align: start; padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
-.doors-table tr.open td { color: var(--ok); }
 
 /* ───────── toast ───────── */
 /* سمتِ مقابلِ پنل (پنل در inline-end است) تا روی سرتیترش نیفتد */
