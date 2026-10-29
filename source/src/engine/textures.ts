@@ -145,8 +145,8 @@ export function blackboardCanvas() {
 }
 
 /** قابِ عکسِ آدم‌ها تا وقتی فایلِ واقعیِ تیم نیامده: n پرترهٔ انتزاعی. */
-export function peopleFallbackCanvas(n: number, seed: number) {
-  const W = 640, H = 420;
+export function peopleFallbackCanvas(n: number, seed: number, aspect = 1.5) {
+  const W = 640, H = Math.round(640 / aspect);
   const [c, g] = canvas(W, H);
   let r = seed;
   const rand = () => ((r = (r * 9301 + 49297) % 233280) / 233280);

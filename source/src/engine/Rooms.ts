@@ -1324,7 +1324,7 @@ export function buildWorld(): World {
 
     // ── سه قابِ عکسِ آدم‌ها (جایگزینِ آدمک‌ها): ۲ + ۶ + ۱۴ = ۲۲ ──
     const photoFrame = (clueId: string, file: string, n: number, x: number, y: number, z: number, ry: number, w: number, hh: number) => {
-      const g = poster(room, assetTexture(file, () => peopleFallbackCanvas(n, n * 37 + 11), 'cover'), x, y, z, ry, w, hh, '#20242b');
+      const g = poster(room, assetTexture(file, () => peopleFallbackCanvas(n, n * 37 + 11, w / hh), 'cover'), x, y, z, ry, w, hh, '#20242b');
       // قابِ عکس: پاس‌پارتو + یک چراغِ کوچکِ بالای قاب
       g.add(rbox(w + 0.14, hh + 0.14, 0.02, '#e8eaee', 0, 0, -0.012, { roughness: 0.6 }, 0.01));
       g.add(rbox(0.22, 0.045, 0.1, '#3a4049', 0, hh / 2 + 0.11, 0.05, { metalness: 0.5 }, 0.015));
