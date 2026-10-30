@@ -6,7 +6,7 @@ import { GameState, type Mode } from './game/GameState';
 import { interactDoor, sideFor } from './game/DoorLogic';
 import { collectKey, findCoin, insertKeys, toggleHatch, pressProtocol, skip, type SubmitResult } from './game/PuzzleController';
 import { sound } from './game/Sound';
-import { loadTheme, saveTheme, applyTheme, type Theme } from './game/Settings';
+import { getTheme, setTheme, toggleTheme } from './game/Settings';
 import { Stage } from './engine/Scene';
 import type { Interactable } from './engine/Rooms';
 import { h, toast, openPanel, closePanel } from './ui/dom';
@@ -21,8 +21,7 @@ import { puzzleImage, canvasImage } from './ui/PuzzleImage';
 import { blackboardCanvas, adsCanvas, liarCanvas, noteCanvas, loadCanvasFonts } from './engine/textures';
 
 setLang();
-let theme: Theme = loadTheme();
-applyTheme(theme);
+setTheme(getTheme());
 const state = new GameState();
 
 // صحنه بعد از لود فونت‌ها ساخته می‌شود تا نوشته‌های کانواسی دیوارها با Paradox کشیده شوند.
@@ -254,12 +253,10 @@ const hud = new Hud(state, {
   restart: () => restart(),
   goRoom: (room) => goToRoom(room),
   toggleTheme: () => {
-    theme = theme === 'dark' ? 'light' : 'dark';
-    applyTheme(theme);
-    saveTheme(theme);
+    toggleTheme();
     state.emit();
   },
-  theme: () => theme,
+  theme: getTheme,
 });
 
 function start(mode: Mode = 'guide') {

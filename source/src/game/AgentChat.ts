@@ -54,8 +54,21 @@ export function boredReply() {
   return BORED_DEVAN[Math.floor(Math.random() * BORED_DEVAN.length)];
 }
 
-export async function sendChat(settings: ChatSettings, room: RoomId, state: GameState, history: ChatMsg[], signal?: AbortSignal): Promise<string> {
+/**
+ * یک پاسخ می‌گیرد و هر تکه را همان لحظه به `onDelta` می‌دهد (SSE استاندارد OpenAI).
+ * اگر ارائه‌دهنده استریم را پشتیبانی نکند و JSON معمولی برگرداند، همان متن یک‌جا
+ * تحویل می‌شود؛ نمایشِ تایپی سمت UI در هر دو حالت یکسان کار می‌کند.
+ */
+export async function sendChat(
+  settings: ChatSettings,
+  room: RoomId,
+  state: GameState,
+  history: ChatMsg[],
+  signal?: AbortSignal,
+  onDelta?: (chunk: string) => void,
+): Promise<string> {
   const url = `${settings.baseUrl.replace(/\/+$/, '')}/chat/completions`;
+  const stream = !!onDelta;
   const res = await fetch(url, {
     method: 'POST',
     signal,
@@ -68,14 +81,51 @@ export async function sendChat(settings: ChatSettings, room: RoomId, state: Game
       messages: buildMessages(room, state, history),
       temperature: 0.85,
       max_tokens: 600,
+      ...(stream ? { stream: true } : {}),
     }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     throw new Error(`${res.status} ${res.statusText} ${body.slice(0, 200)}`);
   }
-  const json = await res.json();
-  const text: string | undefined = json?.choices?.[0]?.message?.content;
-  if (!text) throw new Error('empty response');
-  return text.trim();
+
+  const isSse = (res.headers.get('content-type') ?? '').includes('text/event-stream');
+  if (!stream || !isSse || !res.body) {
+    const json = await res.json();
+    const text: string | undefined = json?.choices?.[0]?.message?.content;
+    if (!text) throw new Error('empty response');
+    const trimmed = text.trim();
+    onDelta?.(trimmed);
+    return trimmed;
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let full = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';              // آخرین خط ممکن است نیمه باشد
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line.startsWith('data:')) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === '[DONE]') continue;
+      try {
+        const chunk = JSON.parse(payload);
+        const delta: string | undefined = chunk?.choices?.[0]?.delta?.content;
+        if (delta) {
+          full += delta;
+          onDelta?.(delta);
+        }
+      } catch {
+        /* قطعه ناقص یا خط غیرJSON — رد شو */
+      }
+    }
+  }
+  if (!full.trim()) throw new Error('empty response');
+  return full.trim();
 }

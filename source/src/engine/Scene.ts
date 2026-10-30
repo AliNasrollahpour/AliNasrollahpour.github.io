@@ -7,9 +7,14 @@ import { CameraRig } from './CameraRig';
 import { Picker, type PickHandlers } from './Interactables';
 import type { GameState } from '../game/GameState';
 import type { RoomId } from '../data/game-data';
+import { getTheme, onTheme } from '../game/Settings';
 
 const INFO_ICON =
   '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="12" cy="6.6" r="1.9" fill="currentColor"/><rect x="10.3" y="10" width="3.4" height="9" rx="1.7" fill="currentColor"/></svg>';
+
+/** رنگ فضای خالی دور نقشه و کف بیرونی، در دو تم. */
+const VOID_COLOR = { dark: '#0b0d12', light: '#e7ebf2' } as const;
+const GROUND_COLOR = { dark: '#0f1218', light: '#cfd6e1' } as const;
 
 function chainVisible(o: THREE.Object3D | null): boolean {
   for (; o; o = o.parent) if (!o.visible) return false;
@@ -29,6 +34,7 @@ export class Stage {
   /** دوربین روی یک شیء فوکوس کرده است (نه نمای کلی اتاق). */
   private focused = false;
   private focusToken = 0;
+  private ground!: THREE.Mesh;
 
   constructor(private host: HTMLElement, private state: GameState, handlers: PickHandlers & { onBadge: (it: Interactable) => void }) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -42,8 +48,9 @@ export class Stage {
     this.labelRenderer.domElement.className = 'label-layer';
     host.appendChild(this.labelRenderer.domElement);
 
-    this.scene.background = new THREE.Color('#0b0d12');
-    this.scene.fog = new THREE.Fog('#0b0d12', 26, 60);
+    // فقط «پوچیِ» دور نقشه با تم عوض می‌شود؛ رنگ اتاق‌ها و پراپ‌ها از game-data می‌آید.
+    this.scene.background = new THREE.Color(VOID_COLOR.dark);
+    this.scene.fog = new THREE.Fog(VOID_COLOR.dark, 26, 60);
     // نقشه محیطی یک‌باره: فلزها و لبه‌های گرد بازتاب نرم می‌گیرند، بدون هزینه هر فریم.
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -54,10 +61,13 @@ export class Stage {
     dir.position.set(10, 30, 20);
     this.scene.add(dir);
 
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#0f1218', roughness: 1 }));
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: GROUND_COLOR.dark, roughness: 1 }));
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.02;
     this.scene.add(ground);
+    this.ground = ground;
+    this.applyTheme(getTheme());
+    onTheme((t) => this.applyTheme(t));
 
     this.world = buildWorld();
     this.scene.add(this.world.root);
@@ -95,6 +105,13 @@ export class Stage {
     window.addEventListener('resize', () => this.resize());
     this.resize();
     this.renderer.setAnimationLoop(() => this.frame());
+  }
+
+  /** پس‌زمینه، مه و کف بیرونی را با تم هماهنگ می‌کند. */
+  private applyTheme(theme: 'dark' | 'light') {
+    (this.scene.background as THREE.Color).set(VOID_COLOR[theme]);
+    (this.scene.fog as THREE.Fog).color.set(VOID_COLOR[theme]);
+    ((this.ground.material as THREE.MeshStandardMaterial).color).set(GROUND_COLOR[theme]);
   }
 
   addFrameHook(fn: (dt: number) => void) {

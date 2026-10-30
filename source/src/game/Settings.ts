@@ -70,3 +70,29 @@ export function saveTheme(theme: Theme) {
 export function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
 }
+
+// ── تم به‌عنوان یک حالت مشترک: صفحه ورود، نوار بالا و صحنه سه‌بعدی همه به آن گوش می‌دهند ──
+let current: Theme | null = null;
+const themeListeners = new Set<(t: Theme) => void>();
+
+export function getTheme(): Theme {
+  return (current ??= loadTheme());
+}
+
+export function setTheme(theme: Theme) {
+  current = theme;
+  applyTheme(theme);
+  saveTheme(theme);
+  for (const fn of themeListeners) fn(theme);
+}
+
+export function toggleTheme(): Theme {
+  const next: Theme = getTheme() === 'dark' ? 'light' : 'dark';
+  setTheme(next);
+  return next;
+}
+
+export function onTheme(fn: (t: Theme) => void) {
+  themeListeners.add(fn);
+  return () => themeListeners.delete(fn);
+}

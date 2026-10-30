@@ -4,6 +4,7 @@ import { settingsForm } from './SettingsForm';
 import { t } from '../data/i18n';
 import { gameData } from '../data/game-data';
 import type { Mode } from '../game/GameState';
+import { getTheme, toggleTheme } from '../game/Settings';
 
 export function showIntro(onStart: (mode: Mode) => void) {
   const root = document.getElementById('intro')!;
@@ -14,13 +15,20 @@ export function showIntro(onStart: (mode: Mode) => void) {
   // روی دسکتاپ، CSS با grid همین‌ها را دو ستونه می‌چیند.
   root.append(
     h('div', { class: 'intro-card' },
-      h('h1', { class: 'intro-title' }, t('appTitle')),
-      h('section', { class: 'intro-config' },
-        h('h3', {}, t('chatConfig')),
-        settingsForm()),
-      h('div', { class: 'intro-actions' },
-        h('button', { class: 'btn big', onclick: () => onStart('guide') }, t('start')),
-        h('p', { class: 'start-hint' }, t('startHint'))),
+      h('div', { class: 'intro-head' },
+        h('h1', { class: 'intro-title' }, t('appTitle')),
+        h('button', {
+          class: 'icon-btn txt theme-btn', title: t('theme'),
+          onclick: () => { toggleTheme(); showIntro(onStart); },
+        }, getTheme() === 'dark' ? t('themeLight') : t('themeDark'))),
+      // ستون کناری: اول پیکربندی، بعد دکمه شروع، بعد توضیح — در دسکتاپ و موبایل یکسان
+      h('div', { class: 'intro-side' },
+        h('section', { class: 'intro-config' },
+          h('h3', {}, t('chatConfig')),
+          settingsForm()),
+        h('div', { class: 'intro-actions' },
+          h('button', { class: 'btn big', onclick: () => onStart('guide') }, t('start')),
+          h('p', { class: 'start-hint' }, t('startHint')))),
       h('section', { class: 'briefing', dir: 'rtl', lang: 'fa' },
         h('h3', {}, t('briefingTitle')),
         ...paras)),
