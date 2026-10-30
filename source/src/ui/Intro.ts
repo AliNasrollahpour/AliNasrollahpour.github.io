@@ -1,8 +1,8 @@
 // صفحه ورود: عنوان، پیکربندی چت ایجنت‌ها، دکمه شروع، و پیام مأموریت به‌عنوان راهنما.
-import { h } from './dom';
+import { h, chatPageUrl } from './dom';
 import { settingsForm } from './SettingsForm';
 import { t } from '../data/i18n';
-import { gameData } from '../data/game-data';
+import { gameData, roomById } from '../data/game-data';
 import type { Mode } from '../game/GameState';
 import { getTheme, toggleTheme } from '../game/Settings';
 
@@ -28,7 +28,15 @@ export function showIntro(onStart: (mode: Mode) => void) {
           settingsForm()),
         h('div', { class: 'intro-actions' },
           h('button', { class: 'btn big', onclick: () => onStart('guide') }, t('start')),
-          h('p', { class: 'start-hint' }, t('startHint')))),
+          h('p', { class: 'start-hint' }, t('startHint'))),
+        // بدون وارد شدن به بازی: مستقیم با هر شخصیت چت کن
+        h('section', { class: 'intro-direct' },
+          h('h3', {}, t('directChat')),
+          h('p', { class: 'muted small' }, t('directChatHint')),
+          h('div', { class: 'direct-grid' },
+            ...gameData.agents.map((a) => h('a', {
+              class: 'direct-link', href: chatPageUrl(a.slug), style: `--c:${roomById(a.roomId).palette.accent}`,
+            }, h('b', {}, a.displayName), h('small', {}, a.name)))))),
       h('section', { class: 'briefing', dir: 'rtl', lang: 'fa' },
         h('h3', {}, t('briefingTitle')),
         ...paras)),

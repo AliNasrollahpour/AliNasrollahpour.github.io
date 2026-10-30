@@ -327,6 +327,17 @@ code { font-family: ui-monospace, Consolas, monospace; background: var(--code-bg
   background: var(--accent); color: #fff;
   box-shadow: 0 10px 30px var(--accent-glow);
 }
+.intro-direct { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+.intro-direct h3 { margin: 0 0 4px; }
+.direct-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.direct-link {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 6px; border-radius: 10px; text-decoration: none;
+  background: var(--panel-2); border: 1px solid var(--line); border-bottom: 3px solid var(--c);
+  color: var(--text);
+}
+.direct-link:hover { background: var(--panel); border-color: var(--c); }
+.direct-link small { color: var(--muted); font-size: 11px; }
 .start-hint { margin: 10px 2px 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
 
 /* ───────── پایان ───────── */

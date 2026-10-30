@@ -88,3 +88,6 @@ export function toast(text: string, kind: 'ok' | 'err' | 'info' | 'key' = 'info'
     setTimeout(() => el.remove(), 300);
   }, ms);
 }
+
+/** نشانی صفحه گفت‌وگوی مستقل یک ایجنت: /fightforknowledge/<slug>/ */
+export const chatPageUrl = (slug: string) => `${import.meta.env.BASE_URL}fightforknowledge/${slug}/`;

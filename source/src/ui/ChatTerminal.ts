@@ -1,5 +1,5 @@
 // ترمینال چت با ایجنت هر اتاق + پنل شخصیت در حالت راهنما + قاعده توکن Devan.
-import { h, openPanel, mdLite, toast } from './dom';
+import { h, openPanel, mdLite, toast, chatPageUrl } from './dom';
 import { t } from '../data/i18n';
 import { agentByRoom, gameData, roomById, coinById, type RoomId } from '../data/game-data';
 import { agentsDoc } from '../data/agents';
@@ -130,6 +130,8 @@ export function openChat(room: RoomId, state: GameState, openSettings: () => voi
     if (!s.apiKey) {
       status.append(h('span', { class: 'pill warn' }, t('chatNoKey')), h('button', { class: 'pill btnish', onclick: openSettings }, t('settings')));
     }
+    // صفحه گفت‌وگوی مستقل همین شخصیت، بیرون از بازی
+    status.append(h('a', { class: 'pill btnish', href: chatPageUrl(agent.slug), target: '_blank', rel: 'noopener' }, t('standaloneChat')));
   };
 
   const send = async (text: string) => {

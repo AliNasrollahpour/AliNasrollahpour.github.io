@@ -1,5 +1,5 @@
 ﻿// کارت حالت راهنما برای هر شیء تعاملی: شناسه، نوع قفل، جواب، چرا، نیت طراحی، و «باز کن».
-import { h, put, openPanel, closePanel, mdLite } from './dom';
+import { h, put, openPanel, closePanel, mdLite, chatPageUrl } from './dom';
 import { formatSolution, lockLabel } from './LockPanel';
 import { puzzleImage } from './PuzzleImage';
 import { t } from '../data/i18n';
@@ -92,7 +92,9 @@ export function openGuide(it: Interactable, state: GameState, act: GuideActions)
     title = `${a.displayName} (${a.name})`;
     kicker = roomById(room).title;
     put(body, h('div', { class: 'persona-md', html: mdLite(agentsDoc.personas[a.name].profile) }),
-      h('div', { class: 'g-actions' }, h('button', { class: 'btn', onclick: () => { closePanel(); act.openChat(room); } }, 'بازکردن ترمینال')));
+      h('div', { class: 'g-actions' },
+        h('button', { class: 'btn', onclick: () => { closePanel(); act.openChat(room); } }, 'بازکردن ترمینال'),
+        h('a', { class: 'btn ghost', href: chatPageUrl(a.slug), target: '_blank', rel: 'noopener' }, t('standaloneChat'))));
   } else if (kind === 'special') {
     if (id === 'FOUR_KEY_LOCK') {
       put(body, row('شرط برد', gameData.win.note), row('کلیدهای جاافتاده', `${state.keysInserted.size} / ${gameData.win.needs.length}`),
