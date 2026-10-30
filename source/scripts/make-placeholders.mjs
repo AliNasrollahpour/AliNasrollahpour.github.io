@@ -6,7 +6,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'assets', 'puzzles');
+const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'media', 'puzzles');
 const FILES = ['fig-map.jpg', 'fig-lego.jpeg', 'fig-scrabble.jpg', 'fig-safe2.jpeg', 'fig-nn.jpg', 'fig-pattern.png', 'fig-chess.jpg', 'fig-maze.jpeg', 'fig-switches.jpeg'];
 
 const crcTable = Array.from({ length: 256 }, (_, n) => {

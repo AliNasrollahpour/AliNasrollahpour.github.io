@@ -89,5 +89,5 @@ export function toast(text: string, kind: 'ok' | 'err' | 'info' | 'key' = 'info'
   }, ms);
 }
 
-/** نشانی صفحه گفت‌وگوی مستقل یک ایجنت: /fightforknowledge/<slug>/ */
-export const chatPageUrl = (slug: string) => `${import.meta.env.BASE_URL}fightforknowledge/${slug}/`;
+/** صفحه گفت‌وگوی مستقل هر ایجنت، کنار خود بازی: /fightforknowledge/<slug>/ */
+export const chatPageUrl = (slug: string) => `${import.meta.env.BASE_URL}${slug}/`;

@@ -23,7 +23,7 @@
             .forEach(function (character) {
                 const card = document.createElement("a");
                 card.className = "character-card";
-                card.href = character.slug + "/";
+                card.href = "../" + character.slug + "/";
                 card.style.setProperty("--accent", character.accent);
 
                 const top = document.createElement("div");

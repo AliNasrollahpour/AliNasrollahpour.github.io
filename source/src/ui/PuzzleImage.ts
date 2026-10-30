@@ -1,4 +1,4 @@
-// تصویر معما از public/assets/puzzles؛ اگر فایل تیم نبود یا placeholder بود، نسخه SVG بازسازی‌شده نشان داده می‌شود.
+// تصویر معما از public/media/puzzles؛ اگر فایل تیم نبود یا placeholder بود، نسخه SVG بازسازی‌شده نشان داده می‌شود.
 import { h } from './dom';
 import { puzzleById } from '../data/game-data';
 import { nnCanvas, mazeCanvas, peopleFallbackCanvas, PLACEHOLDER_MAX } from '../engine/textures';
@@ -9,7 +9,7 @@ const canvasArt = (make: () => HTMLCanvasElement) => () => {
   return `<img src="${c.toDataURL()}" alt="" style="width:100%;display:block">`;
 };
 
-const BASE = `${import.meta.env.BASE_URL}assets/puzzles/`;
+const BASE = `${import.meta.env.BASE_URL}media/puzzles/`;
 
 const RAINBOW: [string, string][] = [
   ['#e53935', '→'], ['#fb8c00', '→'], ['#fdd835', '↑'], ['#43a047', '↓'], ['#1e88e5', '→'], ['#3949ab', '↓'], ['#8e24aa', '←'],

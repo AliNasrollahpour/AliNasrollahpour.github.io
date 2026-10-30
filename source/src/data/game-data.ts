@@ -16,7 +16,7 @@ export type LockType =
   | 'maglock'
   | 'clue';
 
-/** شکل جایگزین (SVG) برای وقتی که تصویر تیم هنوز در public/assets/puzzles نیست. */
+/** شکل جایگزین (SVG) برای وقتی که تصویر تیم هنوز در public/media/puzzles نیست. */
 export type FallbackArt = 'nn' | 'lego' | 'scrabble' | 'safe2' | 'switches' | 'chess' | 'maze' | 'map' | 'pattern';
 
 export interface Puzzle {

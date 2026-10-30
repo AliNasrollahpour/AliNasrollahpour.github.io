@@ -20,12 +20,16 @@
 
 | مسیر | چیست |
 |---|---|
-| `index.html`، `assets/`، `.nojekyll` | **بیلد آماده**؛ GitHub Pages مستقیم از ریشه `main` سرو می‌کند. دستی ویرایش نکن. |
-| `source/` | **سورس اصلی** (Vite + TypeScript + Three.js). همه کار این‌جاست. |
-| `fightforknowledge/` | **اپ چت مستقل** (HTML/JS ساده، بدون بیلد): `/fightforknowledge/` فهرست شخصیت‌ها و `/fightforknowledge/<slug>/` صفحه گفت‌وگوی هر مدل. slugها: `magie`، `evy`، `devan`، `echo`. پرامپت هر کدام از `fightforknowledge/prompts/<slug>.md` با fetch نسبی لود می‌شود. |
-| `archive/` | فقط صفحه شخصی علی (`archive/index.html`، `Profile.jpg`). |
-| `README.md` | معرفی کوتاه ریشه. |
-| `CLAUDE.md` | همین فایل. |
+| `fightforknowledge/` | **دموی بازی سه‌بعدی** — بیلد آماده (`index.html` + `app/` + `media/`). دستی ویرایش نکن. |
+| `fightforknowledge/<agent>/` | صفحه گفت‌وگوی مستقل هر ایجنت: `magie`، `evy`، `devan`، `echo`. اپ چت قدیمی، زنده و کاربردی. |
+| `fightforknowledge/agents/` | فهرست چهار ایجنت (صفحه خانه اپ چت). |
+| `fightforknowledge/assets/` + `prompts/` | دارایی‌های **اپ چت**. بیلد بازی هیچ‌وقت این‌ها را پاک نمی‌کند. |
+| `index.html` (ریشه) | فقط ریدایرکت به `fightforknowledge/`. |
+| `source/` | **سورس اصلی** بازی (Vite + TypeScript + Three.js). همه کار این‌جاست. |
+| `archive/` | صفحه شخصی قدیمی علی (`archive/index.html`، `Profile.jpg`). |
+| `README.md` / `CLAUDE.md` | معرفی ریشه / همین فایل. |
+
+**چرا `app/` و `media/` به‌جای `assets/`:** بازی و اپ چت هر دو داخل `fightforknowledge/` زندگی می‌کنند و اپ چت از قبل `assets/` خودش را داشت. پس در `vite.config.ts` مقدار `assetsDir` روی `app` است و تصاویر معماها در `public/media/puzzles` نشسته‌اند تا هیچ‌وقت روی هم نیفتند. `scripts/publish-root.mjs` فقط `index.html`، `app/` و `media/` را جایگزین می‌کند.
 
 **آرشیو کامل نسخه قبلی:** برنچ `archive/main-2026-10-29` و تگ `archive-main-2026-10-29` (کامیت `7a2fcb7`). کامیت جایگزینی: `1771618` (با push معمولی، نه force؛ تاریخچه کامل است).
 

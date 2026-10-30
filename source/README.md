@@ -81,7 +81,16 @@ npm run build      # tsc + vite build → dist/
 
 ## استقرار
 
-این پروژه در پوشه `source/` ریپوی `AliNasrollahpour.github.io` است و Pages مستقیم از ریشه برنچ `main` سرو می‌کند؛ پس بیلد باید در ریشه ریپو باشد. بعد از هر تغییر:
+این پروژه در پوشه `source/` ریپوی `AliNasrollahpour.github.io` است. ساختار روی دامنه:
+
+| نشانی | چیست |
+|---|---|
+| `/fightforknowledge/` | دموی بازی سه‌بعدی (همین پروژه) |
+| `/fightforknowledge/magie` و `evy` و `devan` و `echo` | صفحه گفت‌وگوی مستقل هر ایجنت |
+| `/fightforknowledge/agents/` | فهرست چهار ایجنت |
+| `/` | ریدایرکت به `/fightforknowledge/` |
+
+چون اپ چت از قبل `assets/` خودش را داخل همان پوشه دارد، بیلد بازی در `app/` و تصاویرش در `media/` می‌نشینند (`assetsDir: 'app'` و `public/media/puzzles`) تا روی هم نیفتند. بعد از هر تغییر:
 
 ```bash
 cd source

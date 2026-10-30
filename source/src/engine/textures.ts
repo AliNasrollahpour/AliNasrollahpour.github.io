@@ -30,10 +30,10 @@ function tex(c: HTMLCanvasElement) {
 
 /** فایل‌های placeholder ریپو ۲×۲ پیکسل‌اند؛ هر تصویر بزرگ‌تر یعنی فایل واقعی تیم آمده است. */
 export const PLACEHOLDER_MAX = 8;
-export const ASSET_BASE = `${import.meta.env.BASE_URL}assets/puzzles/`;
+export const ASSET_BASE = `${import.meta.env.BASE_URL}media/puzzles/`;
 
 /**
- * تکسچر یک فایل تصویر تیم. تا وقتی فایل واقعی در public/assets/puzzles نیست،
+ * تکسچر یک فایل تصویر تیم. تا وقتی فایل واقعی در public/media/puzzles نیست،
  * نسخه بازسازی‌شده نشان داده می‌شود؛ به‌محض آمدن فایل، همان تکسچر جایش را می‌گیرد.
  */
 export function assetTexture(file: string, fallback: () => HTMLCanvasElement, fit: 'cover' | 'contain' = 'cover', pad = '#ffffff') {
